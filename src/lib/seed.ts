@@ -7,6 +7,14 @@ import { blocksToPlain, type Block } from "@/lib/blocks";
 
 const SAMPLE_TAG = "محتوای نمونه";
 
+/** Slugs of the built-in demo posts — they intentionally have no author. */
+export const SAMPLE_SLUGS = [
+  "sample-research-article",
+  "sample-assignment-template",
+  "sample-presentation-structure",
+  "sample-notes-framework",
+];
+
 const SAMPLE_ARTICLE: Block[] = [
   {
     type: "paragraph",

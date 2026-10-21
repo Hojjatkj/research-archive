@@ -1,9 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { count, eq } from "drizzle-orm";
+import { and, count, eq, isNull, notInArray } from "drizzle-orm";
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { items, users } from "@/db/schema";
+import { SAMPLE_SLUGS } from "@/lib/seed";
 import {
   adminEmails,
   createSession,
@@ -25,6 +26,22 @@ import {
 const DB_DOWN = "ارتباط با پایگاه داده برقرار نشد. چند لحظه بعد دوباره تلاش کنید.";
 const BAD_CREDENTIALS = "ایمیل یا رمز عبور درست نیست. دوباره بررسی کنید.";
 const EMAIL_TAKEN = "با این ایمیل قبلاً حساب ساخته شده است. وارد شوید یا ایمیل دیگری بنویسید.";
+
+/**
+ * Posts written with the old single-owner admin panel have no author. The
+ * first admin account takes them over so the owner can keep editing them;
+ * built-in sample posts stay authorless. Best effort — never blocks sign-up.
+ */
+async function claimLegacyItems(userId: number): Promise<void> {
+  try {
+    await db
+      .update(items)
+      .set({ userId })
+      .where(and(isNull(items.userId), notInArray(items.slug, SAMPLE_SLUGS)));
+  } catch {
+    // The account itself was created successfully; nothing to undo.
+  }
+}
 
 /** PostgreSQL error code — drizzle wraps the driver error, so check `cause` too. */
 function pgCode(err: unknown): string | undefined {
@@ -103,6 +120,7 @@ export async function signupAction(_prev: FormState, formData: FormData): Promis
       .returning({ id: users.id });
 
     await createSession(inserted[0].id);
+    if (role === "admin") await claimLegacyItems(inserted[0].id);
     created = true;
   } catch (err) {
     if (pgCode(err) === "23505") return { errors: { email: EMAIL_TAKEN }, values };
