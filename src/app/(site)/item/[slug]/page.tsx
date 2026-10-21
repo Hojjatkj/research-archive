@@ -54,7 +54,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
     : [];
 
   return (
-    <article className="mx-auto max-w-[1180px] px-5 py-12 lg:px-8">
+    <article className="mx-auto max-w-[1180px] px-4 py-8 sm:px-5 sm:py-12 lg:px-8">
       <nav aria-label="مسیر صفحه" className="text-[12px] text-ink-soft">
         <ol className="flex flex-wrap items-center gap-2">
           <li><Link href="/" className="hover:text-ink">خانه</Link></li>
@@ -65,27 +65,27 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
         </ol>
       </nav>
 
-      <header className="mt-8 border-b border-rule pb-10">
+      <header className="mt-6 border-b border-rule pb-7 sm:mt-8 sm:pb-10">
         <p className="text-[12px] font-bold text-accent">{typeLabel(item.type)}</p>
-        <h1 className="mt-4 max-w-4xl text-[clamp(2rem,4.6vw,3.3rem)] font-black leading-[1.32] text-ink">
+        <h1 className="mt-3 max-w-4xl break-words text-[clamp(1.8rem,7vw,3.3rem)] font-black leading-[1.38] text-ink sm:mt-4 sm:leading-[1.32]">
           {item.title}
         </h1>
 
         {item.summary ? (
-          <p className="mt-6 max-w-3xl border-s-2 border-accent ps-5 text-[17px] leading-9 text-ink-2">
+          <p className="mt-4 max-w-3xl border-s-2 border-accent ps-4 text-[15px] leading-8 text-ink-2 sm:mt-6 sm:ps-5 sm:text-[17px] sm:leading-9">
             {item.summary}
           </p>
         ) : null}
 
-        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-[12.5px] text-ink-soft">
+        <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2.5 text-[11.5px] text-ink-soft sm:mt-8 sm:gap-x-6 sm:gap-y-3 sm:text-[12.5px]">
           {author ? (
-            <Link href={`/students/${author.id}`} className="font-bold text-ink hover:text-accent">
+            <Link href={`/students/${author.id}`} className="max-w-full break-words font-bold text-ink hover:text-accent">
               {author.fullName}
             </Link>
           ) : !item.userId ? (
             <span className="border border-dashed border-rule px-2 py-0.5">محتوای بایگانی</span>
           ) : null}
-          {item.course ? <span className="text-ink-2">{item.course}</span> : null}
+          {item.course ? <span className="max-w-full break-words text-ink-2 [overflow-wrap:anywhere]">{item.course}</span> : null}
           {item.publishedAt ? (
             <span>
               انتشار: <Jalali date={item.publishedAt} />
@@ -106,7 +106,27 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
         </div>
       </header>
 
-      <div className="mt-12 grid gap-14 lg:grid-cols-[minmax(0,1fr)_17.5rem]">
+      {toc.length > 0 ? (
+        <details className="group mt-5 border border-rule bg-paper-2 lg:hidden">
+          <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-[13px] font-bold text-ink-2 [&::-webkit-details-marker]:hidden">
+            <span>فهرست این مطلب</span>
+            <svg className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="m5 7.5 5 5 5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </summary>
+          <ol className="max-h-64 space-y-1 overflow-y-auto border-t border-rule px-4 py-3">
+            {toc.map((entry) => (
+              <li key={entry.id} className={entry.level === 3 ? "ps-4" : ""}>
+                <a href={`#${entry.id}`} className="block border-s border-rule py-1 ps-3 text-[12px] leading-6 text-ink-soft hover:border-accent hover:text-ink">
+                  {entry.text}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </details>
+      ) : null}
+
+      <div className="mt-8 grid gap-8 sm:mt-12 sm:gap-10 lg:grid-cols-[minmax(0,1fr)_17.5rem] lg:gap-14">
         <div className="min-w-0">
           <BlockList blocks={item.content} />
 
@@ -164,7 +184,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
           ) : null}
 
           {toc.length > 0 ? (
-            <nav className="border border-rule bg-paper-2 px-5 py-5" aria-label="فهرست مطالب">
+            <nav className="hidden border border-rule bg-paper-2 px-5 py-5 lg:block" aria-label="فهرست مطالب">
               <p className="text-[12px] font-bold text-ink-2">در این صفحه</p>
               <ol className="mt-3 space-y-2">
                 {toc.map((entry) => (

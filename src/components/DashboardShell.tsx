@@ -27,9 +27,9 @@ export function DashboardShell({
       <Grain />
       <div className="relative z-10">
         <header className="no-print border-b border-ink/25 bg-ink text-paper-2">
-          <div className="mx-auto flex max-w-[1180px] flex-wrap items-center gap-x-6 gap-y-3 px-5 pt-4 lg:px-8">
+          <div className="mx-auto flex max-w-[1180px] flex-wrap items-center gap-x-3 gap-y-3 px-4 pt-3 sm:gap-x-6 sm:px-5 sm:pt-4 lg:px-8">
             <Link href="/" className="flex items-center gap-3">
-              <Seal className="h-9 w-9 text-paper-2/90" />
+              <Seal className="h-8 w-8 text-paper-2/90 sm:h-9 sm:w-9" />
               <span className="leading-tight">
                 <span className="block text-[16px] font-black">میز کار مدیر</span>
                 <span className="block text-[11px] text-paper-2/60">بایگانی پژوهش</span>
@@ -38,7 +38,10 @@ export function DashboardShell({
 
             <div className="ms-auto flex flex-wrap items-center gap-2.5">
               <span className="hidden text-[12px] text-paper-2/85 sm:inline" dir="ltr">{user.email}</span>
-              <span className="border border-paper-2/30 px-2 py-0.5 text-[11px] text-paper-2/85">مدیر یگانهٔ سایت</span>
+              <span className="whitespace-nowrap border border-paper-2/30 px-2 py-0.5 text-[10.5px] text-paper-2/85 sm:text-[11px]">
+                <span className="sm:hidden">مدیر</span>
+                <span className="hidden sm:inline">مدیر یگانهٔ سایت</span>
+              </span>
               <form action={logoutAction}>
                 <button
                   type="submit"
@@ -50,7 +53,7 @@ export function DashboardShell({
             </div>
           </div>
 
-          <nav aria-label="بخش‌های میز کار" className="mx-auto mt-3 max-w-[1180px] overflow-x-auto px-5 lg:px-8">
+          <nav aria-label="بخش‌های میز کار" className="mx-auto mt-3 max-w-[1180px] overflow-x-auto px-4 sm:px-5 lg:px-8">
             <ul className="flex min-w-max items-end gap-1">
               {tabs.map((tab) => {
                 const isActive = tab.id === active;
@@ -76,7 +79,7 @@ export function DashboardShell({
           </nav>
         </header>
 
-        <main className="mx-auto max-w-[1180px] px-5 py-10 lg:px-8">{children}</main>
+        <main className="mx-auto max-w-[1180px] px-4 py-7 sm:px-5 sm:py-10 lg:px-8">{children}</main>
       </div>
     </div>
   );

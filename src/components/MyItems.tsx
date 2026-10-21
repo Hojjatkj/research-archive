@@ -120,7 +120,7 @@ export function MyItems({ items }: { items: MyItemDTO[] }) {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="فیلتر وضعیت">
+        <div className="flex max-w-full flex-nowrap gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible" role="group" aria-label="فیلتر وضعیت">
           {filters
             .filter(([id]) => id !== "hidden" || counts.hidden > 0)
             .map(([id, label]) => (
@@ -129,7 +129,7 @@ export function MyItems({ items }: { items: MyItemDTO[] }) {
                 type="button"
                 onClick={() => setFilter(id)}
                 aria-pressed={filter === id}
-                className={`border px-3 py-1.5 text-[12.5px] transition-colors ${
+                className={`min-h-10 shrink-0 whitespace-nowrap border px-3 py-1.5 text-[12px] transition-colors sm:text-[12.5px] ${
                   filter === id ? "border-ink bg-ink text-paper-2" : "border-rule text-ink-2 hover:border-ink"
                 }`}
               >
@@ -143,7 +143,7 @@ export function MyItems({ items }: { items: MyItemDTO[] }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="جست‌وجو در عنوان یا درس…"
-          className="ms-auto w-full border border-rule bg-white px-3.5 py-2 text-[13.5px] focus:border-ink focus:outline-none sm:w-64"
+          className="min-h-11 ms-auto w-full border border-rule bg-white px-3.5 py-2 text-[13.5px] focus:border-ink focus:outline-none sm:w-64"
         />
       </div>
 
@@ -157,12 +157,12 @@ export function MyItems({ items }: { items: MyItemDTO[] }) {
           مطلبی با این فیلتر یا جست‌وجو پیدا نشد.
         </p>
       ) : (
-        <ul className="mt-4 border-t border-rule">
+        <ul className="mt-4 space-y-3 sm:space-y-0 sm:border-t sm:border-rule">
           {visible.map((item) => {
             const busy = busyId === item.id;
             return (
-              <li key={item.id} className="border-b border-rule py-6">
-                <div className="flex flex-wrap items-start gap-x-6 gap-y-4">
+              <li key={item.id} className="border border-rule bg-paper-2 px-4 py-4 shadow-[0_6px_18px_rgba(22,35,63,0.035)] sm:border-x-0 sm:border-t-0 sm:bg-transparent sm:px-0 sm:py-6 sm:shadow-none">
+                <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:gap-x-6 sm:gap-y-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <StatusBadge item={item} />
@@ -193,12 +193,12 @@ export function MyItems({ items }: { items: MyItemDTO[] }) {
                     ) : null}
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Link href={`/dashboard/edit/${item.id}`} className="border border-ink px-3.5 py-2 text-[12.5px] font-bold text-ink hover:bg-ink hover:text-paper-2">
+                  <div className="grid w-full grid-cols-2 gap-2 sm:w-auto sm:flex sm:flex-wrap sm:items-center">
+                    <Link href={`/dashboard/edit/${item.id}`} className="flex min-h-11 items-center justify-center border border-ink px-3 py-2 text-[12px] font-bold text-ink hover:bg-ink hover:text-paper-2 sm:min-h-0 sm:px-3.5 sm:text-[12.5px]">
                       ویرایش
                     </Link>
                     {item.status === "published" && !item.hiddenByAdmin ? (
-                      <Link href={`/item/${item.slug}`} className="border border-rule px-3.5 py-2 text-[12.5px] text-ink-2 hover:border-ink">
+                      <Link href={`/item/${item.slug}`} className="flex min-h-11 items-center justify-center border border-rule px-3 py-2 text-[12px] text-ink-2 hover:border-ink sm:min-h-0 sm:px-3.5 sm:text-[12.5px]">
                         مشاهده
                       </Link>
                     ) : null}
@@ -213,13 +213,13 @@ export function MyItems({ items }: { items: MyItemDTO[] }) {
                           item.status === "published" ? "مطلب به پیش‌نویس برگشت." : "مطلب منتشر شد.",
                         )
                       }
-                      className="border border-rule px-3.5 py-2 text-[12.5px] text-ink-2 hover:border-ink disabled:cursor-not-allowed disabled:opacity-45"
+                      className="flex min-h-11 items-center justify-center border border-rule px-2 py-2 text-center text-[11.5px] text-ink-2 hover:border-ink disabled:cursor-not-allowed disabled:opacity-45 sm:min-h-0 sm:px-3.5 sm:text-[12.5px]"
                     >
                       {busy ? "…" : item.status === "published" ? "لغو انتشار" : "انتشار"}
                     </button>
 
                     {confirmId === item.id ? (
-                      <span className="flex items-center gap-1.5 border border-accent/50 bg-accent/10 px-2 py-1">
+                      <span className="col-span-2 flex w-full flex-wrap items-center justify-center gap-1.5 border border-accent/50 bg-accent/10 px-2 py-2 sm:col-span-1 sm:w-auto sm:justify-start sm:py-1">
                         <span className="text-[12px] text-accent-2">حذف همیشگی؟</span>
                         <button
                           type="button"
@@ -237,7 +237,7 @@ export function MyItems({ items }: { items: MyItemDTO[] }) {
                       <button
                         type="button"
                         onClick={() => setConfirmId(item.id)}
-                        className="border border-transparent px-3 py-2 text-[12.5px] font-bold text-accent hover:border-accent"
+                        className="min-h-11 border border-transparent px-3 py-2 text-center text-[12px] font-bold text-accent hover:border-accent sm:min-h-0 sm:text-[12.5px]"
                       >
                         حذف
                       </button>

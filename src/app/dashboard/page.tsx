@@ -75,8 +75,8 @@ export default async function DashboardPage() {
 
       <div className="mt-8 grid grid-cols-2 gap-px border border-rule bg-rule lg:grid-cols-4">
         {stats.map(([label, value]) => (
-          <div key={label} className="bg-paper-2 px-5 py-5">
-            <p className="num text-[34px] font-semibold leading-none text-ink">{String(value).padStart(2, "0")}</p>
+          <div key={label} className="bg-paper-2 px-3 py-4 sm:px-5 sm:py-5">
+            <p className="num text-[28px] font-semibold leading-none text-ink sm:text-[34px]">{String(value).padStart(2, "0")}</p>
             <p className="mt-2.5 text-[12.5px] font-bold text-ink-2">{label}</p>
           </div>
         ))}

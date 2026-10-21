@@ -79,14 +79,14 @@ export function ModerationList({ items }: { items: ModItemDTO[] }) {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="فیلتر وضعیت">
+        <div className="flex max-w-full flex-nowrap gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible" role="group" aria-label="فیلتر وضعیت">
           {filters.map(([id, label, n]) => (
             <button
               key={id}
               type="button"
               onClick={() => setFilter(id)}
               aria-pressed={filter === id}
-              className={`border px-3 py-1.5 text-[12.5px] transition-colors ${
+              className={`min-h-10 shrink-0 whitespace-nowrap border px-3 py-1.5 text-[12px] transition-colors sm:text-[12.5px] ${
                 filter === id ? "border-ink bg-ink text-paper-2" : "border-rule text-ink-2 hover:border-ink"
               }`}
             >
@@ -100,7 +100,7 @@ export function ModerationList({ items }: { items: ModItemDTO[] }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="جست‌وجو در عنوان یا نام دانشجو…"
-          className="ms-auto w-full border border-rule bg-white px-3.5 py-2 text-[13.5px] focus:border-ink focus:outline-none sm:w-72"
+          className="min-h-11 ms-auto w-full border border-rule bg-white px-3.5 py-2 text-[13.5px] focus:border-ink focus:outline-none sm:w-72"
         />
       </div>
 
@@ -114,13 +114,13 @@ export function ModerationList({ items }: { items: ModItemDTO[] }) {
           {items.length === 0 ? "هنوز مطلبی در کلاس منتشر نشده است." : "مطلبی با این فیلتر پیدا نشد."}
         </p>
       ) : (
-        <ul className="mt-4 border-t border-rule">
+        <ul className="mt-4 space-y-3 sm:space-y-0 sm:border-t sm:border-rule">
           {visible.map((item) => {
             const busy = busyId === item.id;
             const isSample = item.authorId === null;
             return (
-              <li key={item.id} className="border-b border-rule py-6">
-                <div className="flex flex-wrap items-start gap-x-6 gap-y-4">
+              <li key={item.id} className="border border-rule bg-paper-2 px-4 py-4 shadow-[0_6px_18px_rgba(22,35,63,0.035)] sm:border-x-0 sm:border-t-0 sm:bg-transparent sm:px-0 sm:py-6 sm:shadow-none">
+                <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:gap-x-6 sm:gap-y-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2 text-[11.5px]">
                       {item.hiddenByAdmin ? (
@@ -149,9 +149,9 @@ export function ModerationList({ items }: { items: ModItemDTO[] }) {
                     ) : null}
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="grid w-full grid-cols-2 gap-2 sm:w-auto sm:flex sm:flex-wrap sm:items-center">
                     {!item.hiddenByAdmin ? (
-                      <Link href={`/item/${item.slug}`} className="border border-rule px-3.5 py-2 text-[12.5px] text-ink-2 hover:border-ink">
+                      <Link href={`/item/${item.slug}`} className="flex min-h-11 items-center justify-center border border-rule px-3 py-2 text-[12px] text-ink-2 hover:border-ink sm:min-h-0 sm:px-3.5 sm:text-[12.5px]">
                         مشاهده
                       </Link>
                     ) : null}
@@ -161,7 +161,7 @@ export function ModerationList({ items }: { items: ModItemDTO[] }) {
                         type="button"
                         disabled={busy}
                         onClick={() => void run(item.id, () => moderateItemAction(item.id, false, ""), "مطلب دوباره در دید عموم قرار گرفت.")}
-                        className="border border-moss px-3.5 py-2 text-[12.5px] font-bold text-moss hover:bg-moss hover:text-paper-2 disabled:opacity-50"
+                        className="flex min-h-11 items-center justify-center border border-moss px-2 py-2 text-center text-[11.5px] font-bold text-moss hover:bg-moss hover:text-paper-2 disabled:opacity-50 sm:min-h-0 sm:px-3.5 sm:text-[12.5px]"
                       >
                         {busy ? "…" : "بازگرداندن به انتشار"}
                       </button>
@@ -173,7 +173,7 @@ export function ModerationList({ items }: { items: ModItemDTO[] }) {
                           setNote("");
                           setConfirmDeleteId(null);
                         }}
-                        className="border border-accent px-3.5 py-2 text-[12.5px] font-bold text-accent hover:bg-accent hover:text-paper-2"
+                        className="flex min-h-11 items-center justify-center border border-accent px-2 py-2 text-center text-[11.5px] font-bold text-accent hover:bg-accent hover:text-paper-2 sm:min-h-0 sm:px-3.5 sm:text-[12.5px]"
                       >
                         خارج کردن از انتشار
                       </button>
@@ -181,7 +181,7 @@ export function ModerationList({ items }: { items: ModItemDTO[] }) {
 
                     {isSample ? (
                       confirmDeleteId === item.id ? (
-                        <span className="flex items-center gap-1.5 border border-accent/50 bg-accent/10 px-2 py-1">
+                        <span className="col-span-2 flex w-full flex-wrap items-center justify-center gap-1.5 border border-accent/50 bg-accent/10 px-2 py-2 sm:col-span-1 sm:w-auto sm:justify-start sm:py-1">
                           <span className="text-[12px] text-accent-2">حذف مطلب؟</span>
                           <button
                             type="button"
@@ -199,7 +199,7 @@ export function ModerationList({ items }: { items: ModItemDTO[] }) {
                         <button
                           type="button"
                           onClick={() => setConfirmDeleteId(item.id)}
-                          className="px-3 py-2 text-[12px] text-ink-soft underline underline-offset-4 hover:text-accent"
+                          className="min-h-11 border border-rule px-3 py-2 text-[12px] text-ink-soft underline-offset-4 hover:text-accent sm:min-h-0 sm:border-0 sm:underline sm:underline-offset-4"
                         >
                           حذف مطلب
                         </button>

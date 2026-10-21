@@ -41,13 +41,14 @@ export function Nav({ user }: { user: { name: string } | null }) {
         </ul>
       </nav>
 
-      <div className="no-print ms-auto flex items-center gap-2">
+      <div className="no-print ms-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
         {user ? (
           <Link
             href="/dashboard"
-            className="border border-paper-2/40 px-3.5 py-2 text-[13px] font-bold text-paper-2 transition-colors hover:bg-paper-2 hover:text-ink"
+            className="min-h-10 border border-paper-2/40 px-2.5 py-2 text-[11.5px] font-bold text-paper-2 transition-colors hover:bg-paper-2 hover:text-ink sm:px-3.5 sm:text-[13px]"
           >
-            میز کار مدیر
+            <span className="sm:hidden">مدیریت</span>
+            <span className="hidden sm:inline">میز کار مدیر</span>
           </Link>
         ) : null}
 
@@ -56,7 +57,7 @@ export function Nav({ user }: { user: { name: string } | null }) {
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
           aria-controls="mobile-nav"
-          className="border border-paper-2/30 px-3 py-2 text-[13px] text-paper-2 lg:hidden"
+          className="min-h-10 border border-paper-2/30 px-2.5 py-2 text-[11.5px] text-paper-2 lg:hidden sm:px-3 sm:text-[13px]"
         >
           {open ? "بستن" : "فهرست"}
         </button>

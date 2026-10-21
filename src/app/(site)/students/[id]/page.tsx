@@ -35,7 +35,7 @@ export default async function StudentPage({ params }: { params: Promise<{ id: st
   ];
 
   return (
-    <div className="mx-auto max-w-[1180px] px-5 py-14 lg:px-8">
+    <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-5 sm:py-14 lg:px-8">
       <nav aria-label="مسیر صفحه" className="text-[12px] text-ink-soft">
         <ol className="flex flex-wrap items-center gap-2">
           <li><Link href="/" className="hover:text-ink">خانه</Link></li>
@@ -46,34 +46,34 @@ export default async function StudentPage({ params }: { params: Promise<{ id: st
         </ol>
       </nav>
 
-      <div className="mt-7 grid items-start gap-10 lg:grid-cols-[22rem_minmax(0,1fr)]">
+      <div className="mt-5 grid items-start gap-7 sm:mt-7 sm:gap-10 lg:grid-cols-[22rem_minmax(0,1fr)]">
         <aside className="lg:sticky lg:top-28">
           <section className="border border-ink/25 bg-paper-2">
-            <div className="bg-ink px-6 py-5 text-paper-2">
+            <div className="bg-ink px-4 py-4 text-paper-2 sm:px-6 sm:py-5">
               <p className="text-[11px] font-bold text-paper-2/65">اطلاعات دانشجو</p>
-              <h1 className="mt-2 text-[24px] font-black leading-[1.5]">{student.fullName}</h1>
+              <h1 className="mt-2 break-words text-[21px] font-black leading-[1.45] [overflow-wrap:anywhere] sm:text-[24px] sm:leading-[1.5]">{student.fullName}</h1>
             </div>
             <dl className="divide-y divide-rule text-[13.5px]">
-              {facts.map(([label, value, ltr]) => (
-                <div key={label} className="flex items-baseline justify-between gap-4 px-6 py-3">
+              {facts.filter(([, value]) => value).map(([label, value, ltr]) => (
+                <div key={label} className="grid grid-cols-[minmax(6rem,0.45fr)_minmax(0,1fr)] items-start gap-3 px-4 py-3 sm:flex sm:items-baseline sm:justify-between sm:gap-4 sm:px-6">
                   <dt className="text-ink-soft">{label}</dt>
-                  <dd dir={ltr ? "ltr" : undefined} className={`text-left font-bold ${value ? "text-ink-2" : "text-ink-soft/50"} ${ltr ? "num" : ""}`}>
-                    {value || "—"}
+                  <dd dir={ltr ? "ltr" : undefined} className={`min-w-0 break-words text-left font-bold text-ink-2 [overflow-wrap:anywhere] ${ltr ? "num" : ""}`}>
+                    {value}
                   </dd>
                 </div>
               ))}
-              <div className="flex items-baseline justify-between gap-4 px-6 py-3">
+              <div className="grid grid-cols-[minmax(6rem,0.45fr)_minmax(0,1fr)] items-start gap-3 px-4 py-3 sm:flex sm:items-baseline sm:justify-between sm:gap-4 sm:px-6">
                 <dt className="text-ink-soft">عضویت از</dt>
                 <dd className="text-left text-ink-2"><Jalali date={student.createdAt} /></dd>
               </div>
             </dl>
             {student.bio ? (
-              <p className="border-t border-rule px-6 py-4 text-[13.5px] leading-8 text-ink-2">{student.bio}</p>
+              <p className="border-t border-rule px-4 py-3 text-[13px] leading-7 text-ink-2 sm:px-6 sm:py-4 sm:text-[13.5px] sm:leading-8">{student.bio}</p>
             ) : null}
           </section>
 
-          <div className="mt-5 border border-rule bg-paper-2 px-5 py-4 text-center">
-            <p className="num text-[30px] font-semibold leading-none text-ink">{String(rows.length).padStart(2, "0")}</p>
+          <div className="mt-3 border border-rule bg-paper-2 px-4 py-3 text-center sm:mt-5 sm:px-5 sm:py-4">
+            <p className="num text-[26px] font-semibold leading-none text-ink sm:text-[30px]">{String(rows.length).padStart(2, "0")}</p>
             <p className="mt-2 text-[12px] text-ink-soft">مطلب منتشرشده</p>
           </div>
         </aside>

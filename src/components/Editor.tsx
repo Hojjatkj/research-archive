@@ -330,7 +330,7 @@ export function Editor({ initial, savedFlash }: { initial: ItemDTO | null; saved
 
       <div className="relative z-10">
         <header className="no-print sticky top-0 z-30 border-b border-ink/25 bg-ink text-paper-2">
-          <div className="mx-auto flex max-w-[1180px] flex-wrap items-center gap-x-5 gap-y-3 px-5 py-3.5 lg:px-8">
+          <div className="mx-auto flex max-w-[1180px] flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 sm:gap-x-5 sm:gap-y-3 sm:px-5 sm:py-3.5 lg:px-8">
             <div>
               <p className="num text-[10px] text-paper-2/55">
                 {initial?.id ? `EDIT #${initial.id}` : "NEW ITEM"}
@@ -374,7 +374,7 @@ export function Editor({ initial, savedFlash }: { initial: ItemDTO | null; saved
           </div>
         </header>
 
-        <div className="mx-auto max-w-[1180px] px-5 py-9 lg:px-8">
+        <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-5 sm:py-9 lg:px-8">
           {flash ? (
             <p
               role="status"
@@ -410,7 +410,7 @@ export function Editor({ initial, savedFlash }: { initial: ItemDTO | null; saved
           ) : null}
 
           {preview ? (
-            <div className="border border-rule bg-paper-2 px-7 py-10">
+            <div className="border border-rule bg-paper-2 px-4 py-6 sm:px-7 sm:py-10">
               <p className="mb-8 border-b border-rule pb-4 text-[12px] text-ink-soft">
                 پیش‌نمایش مطلب — دقیقاً با همان قالب‌بندی وب‌سایت
               </p>
@@ -418,16 +418,16 @@ export function Editor({ initial, savedFlash }: { initial: ItemDTO | null; saved
                 {title || "بدون عنوان"}
               </h1>
               {summary ? (
-                <p className="mt-5 border-e-2 border-accent pe-5 text-[16px] leading-9 text-ink-2">
+                <p className="mt-4 border-e-2 border-accent pe-4 text-[14px] leading-7 text-ink-2 sm:mt-5 sm:pe-5 sm:text-[16px] sm:leading-9">
                   {summary}
                 </p>
               ) : null}
-              <div className="mt-10">
+              <div className="mt-7 sm:mt-10">
                 <BlockList blocks={blocks} preview />
               </div>
             </div>
           ) : (
-            <div className="grid gap-10 lg:grid-cols-[1fr_19rem]">
+            <div className="grid gap-6 sm:gap-10 lg:grid-cols-[1fr_19rem]">
               <div>
                 {/* ── blocks ───────────────────────── */}
                 <div className="flex flex-wrap items-baseline justify-between gap-4 border-b-2 border-ink pb-4">

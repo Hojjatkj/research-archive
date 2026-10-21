@@ -16,7 +16,7 @@ export default async function SearchPage({
   const results = await searchPublished(q);
 
   return (
-    <div className="mx-auto max-w-[1180px] px-5 py-14 lg:px-8">
+    <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-5 sm:py-14 lg:px-8">
       <nav aria-label="مسیر صفحه" className="text-[12px] text-ink-soft">
         <ol className="flex flex-wrap items-center gap-2">
           <li>
@@ -30,10 +30,10 @@ export default async function SearchPage({
       </nav>
 
       <header className="mt-7 border-b-2 border-ink pb-8">
-        <h1 className="text-[clamp(1.9rem,4vw,2.85rem)] font-black text-ink">
+        <h1 className="break-words text-[clamp(1.8rem,7vw,2.85rem)] font-black leading-[1.4] text-ink [overflow-wrap:anywhere] sm:leading-normal">
           {q ? `نتایج جست‌وجو برای «${q}»` : "جست‌وجو در بایگانی"}
         </h1>
-        <p className="mt-4 max-w-2xl text-[15px] leading-9 text-ink-soft">
+        <p className="mt-3 max-w-2xl text-[14px] leading-7 text-ink-soft sm:mt-4 sm:text-[15px] sm:leading-9">
           جست‌وجو در عنوان، خلاصه، متن کامل مطالب، نام درس و برچسب‌ها انجام می‌شود. مطالب
           پیش‌نویس در نتایج نمایش داده نمی‌شوند.
         </p>

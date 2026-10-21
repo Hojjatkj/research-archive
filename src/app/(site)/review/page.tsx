@@ -28,7 +28,7 @@ export default async function ReviewLogPage({
   const markedItems = rows.filter((item) => (counts.get(item.id) ?? 0) > 0).length;
 
   return (
-    <div className="mx-auto max-w-[1180px] px-5 py-14 lg:px-8">
+    <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-5 sm:py-14 lg:px-8">
       <nav aria-label="مسیر صفحه" className="text-[12px] text-ink-soft">
         <ol className="flex flex-wrap items-center gap-2">
           <li><Link href="/" className="hover:text-ink">خانه</Link></li>
@@ -37,14 +37,14 @@ export default async function ReviewLogPage({
         </ol>
       </nav>
 
-      <header className="mt-7 border-b-2 border-ink pb-8">
+      <header className="mt-6 border-b-2 border-ink pb-6 sm:mt-7 sm:pb-8">
         <p className="text-[12px] font-bold text-accent">فقط مدیر</p>
         <div className="mt-4 flex flex-wrap items-end justify-between gap-8">
           <div className="max-w-2xl">
-            <h1 className="text-[clamp(2.05rem,4.6vw,3.1rem)] font-black leading-[1.32] text-ink">
+            <h1 className="text-[clamp(1.8rem,7vw,3.1rem)] font-black leading-[1.35] text-ink sm:leading-[1.32]">
               {student ? `ثبت‌های مشاهدهٔ ${student.fullName}` : "آمار ثبت‌های مشاهده"}
             </h1>
-            <p className="mt-4 text-[15px] leading-9 text-ink-soft">
+            <p className="mt-3 text-[14px] leading-7 text-ink-soft sm:mt-4 sm:text-[15px] sm:leading-9">
               تعداد دفعات یکتایی که بازدیدکنندگان برای هر مطلب دکمهٔ «من این مطلب را دیدم» را زده‌اند.
               این گزارش برای عموم نمایش داده نمی‌شود.
             </p>
@@ -54,13 +54,13 @@ export default async function ReviewLogPage({
               </Link>
             ) : null}
           </div>
-          <div className="flex items-end gap-8">
+          <div className="flex items-end gap-5 sm:gap-8">
             <div>
-              <p className="num text-[42px] font-semibold leading-none text-ink">{String(totalMarks).padStart(2, "0")}</p>
+              <p className="num text-[34px] font-semibold leading-none text-ink sm:text-[42px]">{String(totalMarks).padStart(2, "0")}</p>
               <p className="mt-2 text-[12px] text-ink-soft">کل ثبت‌ها</p>
             </div>
             <div>
-              <p className="num text-[42px] font-semibold leading-none text-accent">{String(markedItems).padStart(2, "0")}</p>
+              <p className="num text-[34px] font-semibold leading-none text-accent sm:text-[42px]">{String(markedItems).padStart(2, "0")}</p>
               <p className="mt-2 text-[12px] text-ink-soft">مطالب دارای ثبت</p>
             </div>
           </div>
@@ -82,7 +82,7 @@ export default async function ReviewLogPage({
                 </div>
                 <ul>
                   {group.map((item) => (
-                    <li key={item.id} className="flex flex-wrap items-center gap-x-8 gap-y-4 border-b border-rule py-6">
+                    <li key={item.id} className="my-3 flex flex-col gap-3 border border-rule bg-paper-2 px-4 py-4 shadow-[0_6px_18px_rgba(22,35,63,0.035)] sm:my-0 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-8 sm:gap-y-4 sm:border-x-0 sm:border-t-0 sm:bg-transparent sm:px-0 sm:py-6 sm:shadow-none">
                       <div className="min-w-0 flex-1">
                         <h3 className="text-[17px] font-black leading-8 text-ink">
                           <Link href={`/item/${item.slug}`} className="decoration-accent decoration-1 underline-offset-[0.35em] hover:underline">

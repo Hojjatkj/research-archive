@@ -23,7 +23,7 @@ export default async function LoginPage({
   const configured = adminAuthConfigured();
 
   return (
-    <div className="mx-auto grid max-w-[1180px] items-start gap-12 px-5 py-12 lg:grid-cols-[minmax(0,28rem)_1fr] lg:gap-20 lg:px-8 lg:py-20">
+    <div className="mx-auto grid max-w-[1180px] items-start gap-8 px-4 py-8 sm:gap-12 sm:px-5 sm:py-12 lg:grid-cols-[minmax(0,28rem)_1fr] lg:gap-20 lg:px-8 lg:py-20">
       <section>
         <p className="text-[12px] font-bold text-accent">دسترسی خصوصی</p>
         <h1 className="mt-5 text-[clamp(1.9rem,4vw,2.5rem)] font-black leading-[1.35] text-ink">
@@ -54,7 +54,7 @@ export default async function LoginPage({
         </Link>
       </section>
 
-      <aside className="border border-ink/20 bg-ink px-7 py-9 text-paper-2 lg:mt-16 lg:px-10 lg:py-12">
+      <aside className="border border-ink/20 bg-ink px-5 py-6 text-paper-2 sm:px-7 sm:py-9 lg:mt-16 lg:px-10 lg:py-12">
         <p className="text-[12px] font-bold text-paper-2/65">برای بازدیدکنندگان</p>
         <h2 className="mt-4 text-[clamp(1.4rem,2.6vw,1.9rem)] font-black leading-[1.55]">
           آرشیو عمومی و فقط‌خواندنی است.

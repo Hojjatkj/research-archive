@@ -194,13 +194,14 @@ export function BlockView({
               <span className="num">جدول</span> — {block.caption}
             </p>
           ) : null}
-          <div className="table-scroll">
+
+          <div className="table-scroll mt-3 hidden sm:block">
             <table dir={dirAttr(block.dir) ?? "rtl"}>
               {block.header.length ? (
                 <thead>
                   <tr>
                     {block.header.map((cell, i) => (
-                      <th key={i}>{renderInline(cell)}</th>
+                      <th key={i} scope="col">{renderInline(cell)}</th>
                     ))}
                   </tr>
                 </thead>
@@ -215,6 +216,25 @@ export function BlockView({
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div className="mt-3 space-y-3 sm:hidden" role="list" aria-label={block.caption || "ردیف‌های جدول"}>
+            {block.rows.map((row, i) => (
+              <div key={i} role="listitem">
+                <dl dir={dirAttr(block.dir) ?? "rtl"} className="border border-rule bg-paper-2 px-3.5 py-1">
+                  {row.map((cell, j) => (
+                    <div key={j} className="grid grid-cols-[minmax(5rem,0.42fr)_minmax(0,1fr)] gap-3 border-b border-rule/70 py-2.5 last:border-b-0">
+                      <dt className="text-[11px] font-bold leading-6 text-ink-soft">
+                        {block.header[j] || `ستون ${j + 1}`}
+                      </dt>
+                      <dd className="min-w-0 break-words text-[13px] leading-7 text-ink-2 [overflow-wrap:anywhere]">
+                        {renderInline(cell)}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            ))}
           </div>
         </div>
       );

@@ -15,12 +15,12 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       <Grain />
       <div className="relative z-10">
         <header className="no-print sticky top-0 z-40 border-b border-ink/25 bg-ink text-paper-2">
-          <div className="relative mx-auto flex max-w-[1180px] items-center gap-4 px-5 py-3 lg:px-8">
-            <Link href="/" className="flex shrink-0 items-center gap-3">
-              <Seal className="h-10 w-10 text-paper-2/90" />
+          <div className="relative mx-auto flex max-w-[1180px] items-center gap-2 px-4 py-2.5 sm:gap-4 sm:px-5 sm:py-3 lg:px-8">
+            <Link href="/" className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-3">
+              <Seal className="h-9 w-9 text-paper-2/90 sm:h-10 sm:w-10" />
               <span className="leading-tight">
-                <span className="block text-[17px] font-black">بایگانی پژوهش</span>
-                <span className="num block text-[10px] text-paper-2/60">RESEARCH ARCHIVE</span>
+                <span className="block whitespace-nowrap text-[15px] font-black sm:text-[17px]">بایگانی پژوهش</span>
+                <span className="num hidden text-[10px] text-paper-2/60 sm:block">RESEARCH ARCHIVE</span>
               </span>
             </Link>
             <Nav user={user ? { name: user.fullName } : null} />
@@ -30,7 +30,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         <main>{children}</main>
 
         <footer className="no-print mt-24 border-t border-rule bg-paper-2/70">
-          <div className="mx-auto grid max-w-[1180px] gap-8 px-5 py-12 md:grid-cols-3 lg:px-8">
+          <div className="mx-auto grid max-w-[1180px] gap-6 px-4 py-8 sm:gap-8 sm:px-5 sm:py-12 md:grid-cols-3 lg:px-8">
             <div>
               <p className="text-[15px] font-black text-ink">بایگانی پژوهش</p>
               <p className="mt-2.5 text-[13px] leading-8 text-ink-soft">
