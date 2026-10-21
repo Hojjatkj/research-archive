@@ -78,9 +78,20 @@ ALTER TABLE "items" ADD COLUMN IF NOT EXISTS "moderation_note" text DEFAULT '' N
 CREATE TABLE IF NOT EXISTS "reviews" (
   "id" serial PRIMARY KEY NOT NULL,
   "item_id" integer NOT NULL,
-  "reviewer_name" text DEFAULT 'استاد راهنما' NOT NULL,
+  "reviewer_name" text DEFAULT 'بازدیدکننده' NOT NULL,
   "note" text DEFAULT '' NOT NULL,
+  "visitor_token_hash" text,
   "created_at" timestamp DEFAULT now() NOT NULL
+);
+ALTER TABLE "reviews" ADD COLUMN IF NOT EXISTS "visitor_token_hash" text;
+CREATE UNIQUE INDEX IF NOT EXISTS "reviews_item_visitor_unique"
+  ON "reviews" ("item_id", "visitor_token_hash");
+
+CREATE TABLE IF NOT EXISTS "admin_login_attempts" (
+  "ip_hash" text PRIMARY KEY NOT NULL,
+  "attempts" integer DEFAULT 0 NOT NULL,
+  "window_started_at" timestamp DEFAULT now() NOT NULL,
+  "updated_at" timestamp DEFAULT now() NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "sessions" (

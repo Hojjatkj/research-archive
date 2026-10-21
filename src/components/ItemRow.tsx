@@ -15,11 +15,9 @@ export function Jalali({ date }: { date: Date | null }) {
 
 export function ItemRow({
   item,
-  reviewed = 0,
   showAuthor = true,
 }: {
   item: Item & { authorName?: string | null };
-  reviewed?: number;
   showAuthor?: boolean;
 }) {
   return (
@@ -30,11 +28,6 @@ export function ItemRow({
           <p className="mt-1 text-[11.5px] text-ink-soft">
             {item.publishedAt ? <Jalali date={item.publishedAt} /> : "منتشر نشده"}
           </p>
-          {reviewed > 0 ? (
-            <p className="mt-2 inline-block border border-accent/40 px-2 py-0.5 text-[11px] font-bold text-accent">
-              ✓ مشاهده شد
-            </p>
-          ) : null}
         </div>
 
         <div className="min-w-0 flex-1">
@@ -56,7 +49,7 @@ export function ItemRow({
                   {item.authorName}
                 </Link>
               ) : !item.userId ? (
-                <span className="border border-dashed border-rule px-2 py-0.5 text-[11px]">محتوای نمونه</span>
+                <span className="border border-dashed border-rule px-2 py-0.5 text-[11px]">محتوای آرشیو</span>
               ) : null
             ) : null}
             {item.course ? <span className="text-ink-2">{item.course}</span> : null}

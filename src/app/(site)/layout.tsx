@@ -13,7 +13,6 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
   return (
     <div className="relative min-h-screen">
       <Grain />
-
       <div className="relative z-10">
         <header className="no-print sticky top-0 z-40 border-b border-ink/25 bg-ink text-paper-2">
           <div className="relative mx-auto flex max-w-[1180px] items-center gap-4 px-5 py-3 lg:px-8">
@@ -35,8 +34,8 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
             <div>
               <p className="text-[15px] font-black text-ink">بایگانی پژوهش</p>
               <p className="mt-2.5 text-[13px] leading-8 text-ink-soft">
-                بایگانی کلاسی تکالیف، متن‌های پژوهشی، ارائه‌ها و جزوه‌ها؛ هر دانشجو کارهای خودش را منتشر
-                می‌کند و استاد راهنما آن‌ها را منظم می‌بیند.
+                آرشیو عمومی تکالیف، متن‌های پژوهشی، ارائه‌ها و جزوه‌ها. همه می‌توانند مطالب منتشرشده را بخوانند؛
+                مدیریت و انتشار محتوا فقط در اختیار مدیر سایت است.
               </p>
             </div>
             <div>
@@ -46,25 +45,23 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
                 <li><Link className="hover:text-ink" href="/presentations">ارائه‌ها</Link></li>
                 <li><Link className="hover:text-ink" href="/notes">جزوه‌ها</Link></li>
                 <li><Link className="hover:text-ink" href="/students">اطلاعات دانشجو</Link></li>
-                <li><Link className="hover:text-ink" href="/review">کارنامهٔ بازبینی</Link></li>
               </ul>
             </div>
             <div>
-              <p className="text-[13px] font-bold text-ink-2">برای استاد راهنما</p>
+              <p className="text-[13px] font-bold text-ink-2">ثبت بازدید</p>
               <p className="mt-3 text-[13px] leading-8 text-ink-soft">
-                برای خواندن مطالب و ثبت «مشاهده شد» نیازی به حساب کاربری نیست. از فهرست «اطلاعات
-                دانشجو» شروع کنید.
+                برای ثبت «من دیدم» حساب نمی‌خواهید؛ فقط روی دکمهٔ زیر مطلب کلیک کنید. هر مرورگر برای هر مطلب یک‌بار ثبت دارد.
               </p>
               <Link
-                href="/students"
+                href="/login"
                 className="mt-4 inline-block border border-ink px-3.5 py-2 text-[13px] font-bold text-ink transition-colors hover:bg-ink hover:text-paper-2"
               >
-                رفتن به اطلاعات دانشجو
+                ورود مدیر سایت
               </Link>
             </div>
           </div>
           <div className="border-t border-rule px-5 py-5 text-center">
-            <p className="num text-[11px] text-ink-soft">RESEARCH ARCHIVE · CLASS PUBLISHING · RTL / LTR</p>
+            <p className="num text-[11px] text-ink-soft">RESEARCH ARCHIVE · READ ONLY · RTL / LTR</p>
           </div>
         </footer>
       </div>

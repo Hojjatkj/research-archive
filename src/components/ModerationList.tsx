@@ -129,12 +129,12 @@ export function ModerationList({ items }: { items: ModItemDTO[] }) {
                         <span className="border border-moss/40 bg-moss/10 px-2 py-0.5 font-bold text-moss">در دید عموم</span>
                       )}
                       <span className="text-ink-soft">{TYPE_LABELS[item.type] ?? item.type}</span>
-                      {item.reviews > 0 ? <span className="text-accent">✓ مشاهده شد ({item.reviews})</span> : null}
+                      <span className="text-accent">ثبت «من دیدم»: {item.reviews}</span>
                     </div>
                     <h3 className="mt-2 text-[16.5px] font-black leading-8 text-ink">{item.title}</h3>
                     <p className="mt-0.5 text-[12.5px] text-ink-soft">
                       {isSample ? (
-                        "محتوای نمونهٔ سیستم"
+                        "مطلب بدون حساب نویسنده"
                       ) : (
                         <>
                           نویسنده:{" "}
@@ -182,11 +182,11 @@ export function ModerationList({ items }: { items: ModItemDTO[] }) {
                     {isSample ? (
                       confirmDeleteId === item.id ? (
                         <span className="flex items-center gap-1.5 border border-accent/50 bg-accent/10 px-2 py-1">
-                          <span className="text-[12px] text-accent-2">حذف نمونه؟</span>
+                          <span className="text-[12px] text-accent-2">حذف مطلب؟</span>
                           <button
                             type="button"
                             disabled={busy}
-                            onClick={() => void run(item.id, () => deleteItemAction(item.id), "محتوای نمونه حذف شد.")}
+                            onClick={() => void run(item.id, () => deleteItemAction(item.id), "مطلب حذف شد.")}
                             className="bg-accent px-2.5 py-1 text-[12px] font-bold text-paper-2 disabled:opacity-60"
                           >
                             بله
@@ -201,7 +201,7 @@ export function ModerationList({ items }: { items: ModItemDTO[] }) {
                           onClick={() => setConfirmDeleteId(item.id)}
                           className="px-3 py-2 text-[12px] text-ink-soft underline underline-offset-4 hover:text-accent"
                         >
-                          حذف محتوای نمونه
+                          حذف مطلب
                         </button>
                       )
                     ) : null}
@@ -211,7 +211,7 @@ export function ModerationList({ items }: { items: ModItemDTO[] }) {
                 {hidingId === item.id ? (
                   <div className="mt-4 border border-accent/40 bg-accent/5 px-4 py-4">
                     <label htmlFor={`note-${item.id}`} className="block text-[12.5px] font-bold text-ink-2">
-                      دلیل (اختیاری؛ برای دانشجو نمایش داده می‌شود)
+                      یادداشت داخلی (اختیاری)
                     </label>
                     <textarea
                       id={`note-${item.id}`}
@@ -219,17 +219,17 @@ export function ModerationList({ items }: { items: ModItemDTO[] }) {
                       maxLength={300}
                       value={note}
                       onChange={(e) => setNote(e.target.value)}
-                      placeholder="مثلاً: منابع ناقص است؛ پس از اصلاح دوباره بررسی می‌شود."
+                      placeholder="مثلاً: نیاز به بازبینی منابع دارد."
                       className="mt-2 w-full resize-y border border-rule bg-white px-3 py-2 text-[13px] leading-7 focus:border-ink focus:outline-none"
                     />
                     <p className="mt-2 text-[11.5px] leading-6 text-ink-soft">
-                      مطلب حذف نمی‌شود؛ فقط از دید عموم پنهان می‌شود و در میز کار دانشجو باقی می‌ماند.
+                      با خارج کردن از انتشار، مطلب عمومی نیست اما برای شما در میز کار محفوظ می‌ماند.
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <button
                         type="button"
                         disabled={busy}
-                        onClick={() => void run(item.id, () => moderateItemAction(item.id, true, note), "مطلب از دید عموم خارج شد؛ نسخهٔ دانشجو محفوظ است.")}
+                        onClick={() => void run(item.id, () => moderateItemAction(item.id, true, note), "مطلب از دید عموم خارج شد و در میز کار مدیر محفوظ ماند.")}
                         className="bg-accent px-4 py-2 text-[12.5px] font-bold text-paper-2 hover:bg-accent-2 disabled:opacity-60"
                       >
                         {busy ? "در حال انجام…" : "تأیید و خارج کردن از انتشار"}

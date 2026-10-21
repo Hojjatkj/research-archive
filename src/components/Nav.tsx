@@ -10,7 +10,6 @@ const LINKS = [
   { href: "/presentations", label: "ارائه‌ها" },
   { href: "/notes", label: "جزوه‌ها" },
   { href: "/students", label: "اطلاعات دانشجو" },
-  { href: "/review", label: "بازبینی" },
 ];
 
 export function Nav({ user }: { user: { name: string } | null }) {
@@ -48,28 +47,13 @@ export function Nav({ user }: { user: { name: string } | null }) {
             href="/dashboard"
             className="border border-paper-2/40 px-3.5 py-2 text-[13px] font-bold text-paper-2 transition-colors hover:bg-paper-2 hover:text-ink"
           >
-            میز کار من
+            میز کار مدیر
           </Link>
-        ) : (
-          <>
-            <Link
-              href="/login"
-              className="hidden border border-paper-2/30 px-3.5 py-2 text-[13px] text-paper-2/90 transition-colors hover:border-paper-2 hover:text-paper-2 sm:block"
-            >
-              ورود
-            </Link>
-            <Link
-              href="/signup"
-              className="border border-accent bg-accent px-3.5 py-2 text-[13px] font-bold text-paper-2 transition-colors hover:bg-accent-2"
-            >
-              ثبت‌نام
-            </Link>
-          </>
-        )}
+        ) : null}
 
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
           aria-controls="mobile-nav"
           className="border border-paper-2/30 px-3 py-2 text-[13px] text-paper-2 lg:hidden"
@@ -96,15 +80,10 @@ export function Nav({ user }: { user: { name: string } | null }) {
               </li>
             ))}
           </ul>
-          {!user ? (
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <Link href="/login" onClick={() => setOpen(false)} className="border border-paper-2/30 py-2.5 text-center text-[14px] text-paper-2">
-                ورود
-              </Link>
-              <Link href="/signup" onClick={() => setOpen(false)} className="border border-accent bg-accent py-2.5 text-center text-[14px] font-bold text-paper-2">
-                ثبت‌نام
-              </Link>
-            </div>
+          {user ? (
+            <Link href="/dashboard" onClick={() => setOpen(false)} className="mt-4 block border border-paper-2/30 py-2.5 text-center text-[14px] font-bold text-paper-2">
+              میز کار مدیر
+            </Link>
           ) : null}
         </div>
       ) : null}

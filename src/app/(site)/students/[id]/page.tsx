@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EmptySheet } from "@/components/Brand";
 import { ItemRow, Jalali } from "@/components/ItemRow";
-import { getStudent, listPublished, reviewMap, TYPES, typeLabel } from "@/lib/data";
+import { getStudent, listPublished, TYPES, typeLabel } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -24,11 +24,7 @@ export default async function StudentPage({ params }: { params: Promise<{ id: st
   const student = await load((await params).id);
   if (!student) notFound();
 
-  const [{ rows }, reviews] = await Promise.all([
-    listPublished({ userId: student.id, perPage: 200 }),
-    reviewMap(),
-  ]);
-  const seen = rows.filter((row) => (reviews.get(row.id) ?? 0) > 0).length;
+  const { rows } = await listPublished({ userId: student.id, perPage: 200 });
 
   const facts: [string, string, boolean][] = [
     ["شماره دانشجویی", student.studentNumber, true],
@@ -76,25 +72,10 @@ export default async function StudentPage({ params }: { params: Promise<{ id: st
             ) : null}
           </section>
 
-          <div className="mt-5 grid grid-cols-3 gap-px border border-rule bg-rule text-center">
-            {[
-              ["منتشرشده", rows.length, "text-ink"],
-              ["مشاهده‌شده", seen, "text-accent"],
-              ["در انتظار", rows.length - seen, "text-ink-soft"],
-            ].map(([label, value, color]) => (
-              <div key={String(label)} className="bg-paper-2 px-2 py-4">
-                <p className={`num text-[26px] font-semibold leading-none ${color}`}>{String(value).padStart(2, "0")}</p>
-                <p className="mt-2 text-[11.5px] text-ink-soft">{label}</p>
-              </div>
-            ))}
+          <div className="mt-5 border border-rule bg-paper-2 px-5 py-4 text-center">
+            <p className="num text-[30px] font-semibold leading-none text-ink">{String(rows.length).padStart(2, "0")}</p>
+            <p className="mt-2 text-[12px] text-ink-soft">مطلب منتشرشده</p>
           </div>
-
-          <Link
-            href={`/review?student=${student.id}`}
-            className="mt-5 block border border-ink px-4 py-2.5 text-center text-[13px] font-bold text-ink transition-colors hover:bg-ink hover:text-paper-2"
-          >
-            کارنامهٔ بازبینی این دانشجو
-          </Link>
         </aside>
 
         <div className="min-w-0">
@@ -103,7 +84,7 @@ export default async function StudentPage({ params }: { params: Promise<{ id: st
               <EmptySheet className="h-16 w-16 text-ink/30" />
               <p className="mt-5 text-[18px] font-bold text-ink">هنوز مطلبی منتشر نشده است</p>
               <p className="mt-2.5 max-w-sm text-[14px] leading-8 text-ink-soft">
-                تکالیف، ارائه‌ها و جزوه‌های این دانشجو پس از انتشار این‌جا نمایش داده می‌شوند.
+                در حال حاضر مطلب منتشرشده‌ای برای این دانشجو در آرشیو ثبت نشده است.
               </p>
             </div>
           ) : (
@@ -117,7 +98,7 @@ export default async function StudentPage({ params }: { params: Promise<{ id: st
                     <p className="num text-[12px] text-ink-soft">{String(group.length).padStart(2, "0")} مطلب</p>
                   </div>
                   {group.map((item) => (
-                    <ItemRow key={item.id} item={item} reviewed={reviews.get(item.id) ?? 0} showAuthor={false} />
+                    <ItemRow key={item.id} item={item} showAuthor={false} />
                   ))}
                 </section>
               );

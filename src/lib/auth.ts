@@ -1,72 +1,85 @@
-import { createHash, randomBytes, scrypt as scryptCallback, timingSafeEqual } from "crypto";
-import { promisify } from "util";
+import "server-only";
+
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { and, eq, gt } from "drizzle-orm";
-import { db } from "@/db";
-import { sessions, users } from "@/db/schema";
 import { normalizeEmail } from "@/lib/validation";
 
-export const SESSION_COOKIE = "ra_session";
-const SESSION_DAYS = 30;
-
-const scrypt = promisify(scryptCallback) as (
-  password: string,
-  salt: Buffer,
-  keylen: number,
-) => Promise<Buffer>;
+export const ADMIN_SESSION_COOKIE = "ra_admin_session_v1";
+const SESSION_DAYS = 7;
+const SESSION_MS = SESSION_DAYS * 24 * 60 * 60 * 1000;
 
 export type SessionUser = {
-  id: number;
   email: string;
   fullName: string;
-  role: string;
-  isAdmin: boolean;
+  role: "admin";
+  isAdmin: true;
 };
 
-/**
- * Owner-only admin. ONLY the emails in `ADMIN_EMAILS` (or `ADMIN_EMAIL`) get the
- * admin area. There is deliberately no "first account becomes admin" fallback,
- * so nobody can obtain admin rights by signing up early — and changing the env
- * var takes effect on the next request, because rights are never cached in the DB.
- */
-export function adminEmails(): string[] {
-  const raw = [process.env.ADMIN_EMAILS, process.env.ADMIN_EMAIL].filter(Boolean).join(",");
-  return Array.from(
-    new Set(
-      raw
-        .split(/[,;\s]+/)
-        .map((email) => normalizeEmail(email))
-        .filter(Boolean),
-    ),
+type SessionPayload = {
+  version: 1;
+  email: string;
+  expiresAt: number;
+  nonce: string;
+};
+
+function configuredEmail(): string {
+  return normalizeEmail(process.env.ADMIN_EMAIL);
+}
+
+function configuredPassword(): string {
+  return process.env.ADMIN_PASSWORD ?? "";
+}
+
+function configuredSessionSecret(): string {
+  return process.env.ADMIN_SESSION_SECRET ?? "";
+}
+
+/** A single email/password pair is the entire admin allow-list. */
+export function adminAuthConfigured(): boolean {
+  return (
+    configuredEmail().length > 0 &&
+    Array.from(configuredPassword().normalize("NFKC")).length >= 16 &&
+    Buffer.byteLength(configuredSessionSecret(), "utf8") >= 32
   );
 }
 
-export function isAdminEmail(email: string): boolean {
-  return adminEmails().includes(normalizeEmail(email));
+function digest(value: string): Buffer {
+  return createHash("sha256").update(value).digest();
 }
 
-/* ── passwords: scrypt with a per-user random salt ──────────── */
-
-export async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16);
-  const key = await scrypt(password.normalize("NFKC"), salt, 64);
-  return `scrypt$${salt.toString("hex")}$${key.toString("hex")}`;
+function credentialFingerprint(email: string, password: string): string {
+  return digest(`${email}\0${password.normalize("NFKC")}`).toString("hex");
 }
 
-export async function verifyPassword(password: string, stored: string): Promise<boolean> {
-  const [algorithm, saltHex, keyHex] = stored.split("$");
-  if (algorithm !== "scrypt" || !saltHex || !keyHex) return false;
-  const expected = Buffer.from(keyHex, "hex");
-  const actual = await scrypt(password.normalize("NFKC"), Buffer.from(saltHex, "hex"), expected.length);
-  return actual.length === expected.length && timingSafeEqual(actual, expected);
+function constantTimeStringEqual(left: string, right: string): boolean {
+  return timingSafeEqual(digest(left), digest(right));
 }
 
-/* ── sessions: random token in an httpOnly cookie, only its hash in the DB ── */
+export function verifyAdminCredentials(email: string, password: string): boolean {
+  if (!adminAuthConfigured()) return false;
 
-function hashToken(token: string): string {
-  return createHash("sha256").update(token).digest("hex");
+  const expectedEmail = configuredEmail();
+  const suppliedEmail = normalizeEmail(email);
+  const expectedPassword = configuredPassword().normalize("NFKC");
+  const suppliedPassword = password.normalize("NFKC");
+
+  // Always perform both comparisons to avoid exposing which value was wrong.
+  const emailMatches = constantTimeStringEqual(suppliedEmail, expectedEmail);
+  const passwordMatches = constantTimeStringEqual(suppliedPassword, expectedPassword);
+  return emailMatches && passwordMatches;
+}
+
+function signingKey(): Buffer {
+  const email = configuredEmail();
+  return createHmac("sha256", configuredSessionSecret())
+    .update(credentialFingerprint(email, configuredPassword()))
+    .digest();
+}
+
+function sign(encodedPayload: string): string {
+  return createHmac("sha256", signingKey()).update(encodedPayload).digest("base64url");
 }
 
 async function isSecureRequest(): Promise<boolean> {
@@ -79,72 +92,91 @@ async function isSecureRequest(): Promise<boolean> {
   }
 }
 
-export async function createSession(userId: number): Promise<void> {
-  const token = randomBytes(32).toString("hex");
-  const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
-  await db.insert(sessions).values({ userId, tokenHash: hashToken(token), expiresAt });
+export async function createAdminSession(): Promise<void> {
+  if (!adminAuthConfigured()) throw new Error("Administrator login is not configured.");
+
+  const email = configuredEmail();
+  const expiresAt = Date.now() + SESSION_MS;
+  const payload: SessionPayload = {
+    version: 1,
+    email,
+    expiresAt,
+    nonce: randomBytes(16).toString("hex"),
+  };
+  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const token = `${encodedPayload}.${sign(encodedPayload)}`;
+
   const jar = await cookies();
-  jar.set(SESSION_COOKIE, token, {
+  jar.set(ADMIN_SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: await isSecureRequest(),
     path: "/",
-    expires: expiresAt,
+    expires: new Date(expiresAt),
   });
 }
 
-export async function destroySession(): Promise<void> {
+export async function destroyAdminSession(): Promise<void> {
   const jar = await cookies();
-  const token = jar.get(SESSION_COOKIE)?.value;
-  if (token) {
-    try {
-      await db.delete(sessions).where(eq(sessions.tokenHash, hashToken(token)));
-    } catch {
-      // The cookie is removed below either way.
+  jar.delete(ADMIN_SESSION_COOKIE);
+}
+
+function decodeSession(token: string): SessionPayload | null {
+  if (!adminAuthConfigured() || token.length > 2048) return null;
+  const [encodedPayload, suppliedSignature, extra] = token.split(".");
+  if (!encodedPayload || !suppliedSignature || extra !== undefined) return null;
+
+  const expectedSignature = sign(encodedPayload);
+  if (!constantTimeStringEqual(suppliedSignature, expectedSignature)) return null;
+
+  try {
+    const value: unknown = JSON.parse(Buffer.from(encodedPayload, "base64url").toString("utf8"));
+    if (!value || typeof value !== "object") return null;
+    const payload = value as Partial<SessionPayload>;
+    const email = configuredEmail();
+
+    if (
+      payload.version !== 1 ||
+      payload.email !== email ||
+      typeof payload.expiresAt !== "number" ||
+      !Number.isSafeInteger(payload.expiresAt) ||
+      payload.expiresAt <= Date.now() ||
+      payload.expiresAt > Date.now() + SESSION_MS + 60_000 ||
+      typeof payload.nonce !== "string" ||
+      !/^[0-9a-f]{32}$/.test(payload.nonce)
+    ) {
+      return null;
     }
+    return payload as SessionPayload;
+  } catch {
+    return null;
   }
-  jar.delete(SESSION_COOKIE);
 }
 
-/** Uncached read — safe in route handlers and server actions. */
+/** Uncached session read, safe in route handlers and server actions. */
 export async function readSessionUser(): Promise<SessionUser | null> {
-  let token: string | undefined;
   try {
-    token = (await cookies()).get(SESSION_COOKIE)?.value;
-  } catch {
-    return null;
-  }
-  if (!token) return null;
+    const token = (await cookies()).get(ADMIN_SESSION_COOKIE)?.value;
+    if (!token || !decodeSession(token)) return null;
 
-  try {
-    const rows = await db
-      .select({ id: users.id, email: users.email, fullName: users.fullName, role: users.role })
-      .from(sessions)
-      .innerJoin(users, eq(sessions.userId, users.id))
-      .where(and(eq(sessions.tokenHash, hashToken(token)), gt(sessions.expiresAt, new Date())))
-      .limit(1);
-    const row = rows[0];
-    if (!row) return null;
-    // The `role` column is informational only; admin rights come from the env allow-list.
-    return { ...row, isAdmin: isAdminEmail(row.email) };
+    return {
+      email: configuredEmail(),
+      fullName: "مدیر سایت",
+      role: "admin",
+      isAdmin: true,
+    };
   } catch {
     return null;
   }
 }
 
-/** Deduplicated per request inside server components. */
+/** Deduplicated within a server-component render. */
 export const getCurrentUser = cache(readSessionUser);
 
-export async function requireUser(next = "/dashboard"): Promise<SessionUser> {
+/** All management routes require the one environment-configured administrator. */
+export async function requireAdmin(next = "/dashboard"): Promise<SessionUser> {
   const user = await getCurrentUser();
   if (!user) redirect(`/login?next=${encodeURIComponent(next)}`);
-  return user;
-}
-
-/** Owner-only pages: signed-in users who are not on the allow-list go back to their dashboard. */
-export async function requireAdmin(next: string): Promise<SessionUser> {
-  const user = await requireUser(next);
-  if (!user.isAdmin) redirect("/dashboard");
   return user;
 }
 

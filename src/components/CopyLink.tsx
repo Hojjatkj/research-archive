@@ -1,25 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
+
+const subscribe = () => () => {};
+const getClientOrigin = () => window.location.origin;
+const getServerOrigin = () => "";
 
 /** Shows the absolute URL of a path and copies it with one click. */
 export function CopyLink({ path, label = "کپی لینک" }: { path: string; label?: string }) {
-  const [origin, setOrigin] = useState("");
+  const origin = useSyncExternalStore(subscribe, getClientOrigin, getServerOrigin);
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    setOrigin(window.location.origin);
-  }, []);
-
   const url = `${origin}${path}`;
 
   async function copy() {
+    const absoluteUrl = `${window.location.origin}${path}`;
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(absoluteUrl);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2200);
     } catch {
-      window.prompt("لینک را کپی کنید:", url);
+      window.prompt("لینک را کپی کنید:", absoluteUrl);
     }
   }
 

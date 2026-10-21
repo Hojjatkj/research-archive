@@ -10,8 +10,8 @@ const MAX_BYTES = 4 * 1024 * 1024;
 
 export async function POST(request: Request) {
   const user = await readSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: "برای بارگذاری فایل ابتدا وارد حساب خود شوید." }, { status: 401 });
+  if (!user?.isAdmin) {
+    return NextResponse.json({ error: "بارگذاری فایل فقط برای مدیر سایت مجاز است." }, { status: 401 });
   }
 
   let form: FormData;
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     const inserted = await db
       .insert(files)
       .values({
-        userId: user.id,
+        userId: null,
         name: file.name || "upload.bin",
         mime: file.type || "application/octet-stream",
         size: buffer.length,

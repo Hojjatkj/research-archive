@@ -41,12 +41,13 @@ export function LoginForm({ next }: { next: string }) {
         id="login-email"
         name="email"
         type="email"
-        label="ایمیل"
+        label="ایمیل مدیر"
         required
         dir="ltr"
         inputMode="email"
         autoComplete="email"
-        placeholder="name@university.ac.ir"
+        placeholder="admin@example.com"
+        maxLength={120}
         defaultValue={state.values.email ?? ""}
         error={errors.email}
         onChange={() => clear("email")}
@@ -55,7 +56,7 @@ export function LoginForm({ next }: { next: string }) {
       <PasswordField
         id="login-password"
         name="password"
-        label="رمز عبور"
+        label="رمز عبور مدیر"
         required
         autoComplete="current-password"
         error={errors.password}
@@ -63,7 +64,7 @@ export function LoginForm({ next }: { next: string }) {
       />
 
       <SubmitButton pending={pending} pendingLabel="در حال ورود…">
-        ورود به میز کار
+        ورود به میز کار مدیر
       </SubmitButton>
     </form>
   );

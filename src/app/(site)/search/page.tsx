@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ItemRow } from "@/components/ItemRow";
 import { SearchForm } from "@/components/Pagination";
 import { EmptySheet } from "@/components/Brand";
-import { reviewMap, searchPublished } from "@/lib/data";
+import { searchPublished } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +13,7 @@ export default async function SearchPage({
 }) {
   const params = await searchParams;
   const q = (Array.isArray(params.q) ? params.q[0] : params.q) ?? "";
-  const [results, reviews] = await Promise.all([searchPublished(q), reviewMap()]);
+  const results = await searchPublished(q);
 
   return (
     <div className="mx-auto max-w-[1180px] px-5 py-14 lg:px-8">
@@ -67,7 +67,7 @@ export default async function SearchPage({
             </p>
           ) : null}
           {results.map((item) => (
-            <ItemRow key={item.id} item={item} reviewed={reviews.get(item.id) ?? 0} />
+            <ItemRow key={item.id} item={item} />
           ))}
           {!q ? (
             <p className="py-16 text-center text-[14px] text-ink-soft">

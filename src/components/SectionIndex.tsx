@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ItemRow } from "@/components/ItemRow";
 import { Pagination, SearchForm } from "@/components/Pagination";
 import { EmptySheet } from "@/components/Brand";
-import { allCourses, listPublished, reviewMap, typeLabel } from "@/lib/data";
+import { allCourses, listPublished, typeLabel } from "@/lib/data";
 
 export async function SectionIndex({
   title,
@@ -25,10 +25,9 @@ export async function SectionIndex({
   const typeFilter = Array.isArray(params.type) ? params.type[0] : params.type;
   const activeTypes = showTypeFilter && typeFilter ? [typeFilter] : types;
 
-  const [{ rows, total, pages }, courses, reviews] = await Promise.all([
+  const [{ rows, total, pages }, courses] = await Promise.all([
     listPublished({ type: activeTypes, course, tag, page, perPage: 8 }),
     allCourses(),
-    reviewMap(),
   ]);
 
   const query: Record<string, string> = {};
@@ -107,7 +106,7 @@ export async function SectionIndex({
           ) : (
             <div>
               {rows.map((item) => (
-                <ItemRow key={item.id} item={item} reviewed={reviews.get(item.id) ?? 0} />
+                <ItemRow key={item.id} item={item} />
               ))}
             </div>
           )}

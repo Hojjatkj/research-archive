@@ -5,7 +5,7 @@ import { logoutAction } from "@/app/(auth)/actions";
 import { Seal } from "./Brand";
 import { Grain } from "./Grain";
 
-type Tab = "items" | "profile" | "moderation" | "accounts";
+type Tab = "items" | "moderation";
 
 export function DashboardShell({
   user,
@@ -17,17 +17,10 @@ export function DashboardShell({
   children: ReactNode;
 }) {
   const tabs: { id: Tab | "new"; href: string; label: string }[] = [
-    { id: "items", href: "/dashboard", label: "مطالب من" },
+    { id: "items", href: "/dashboard", label: "آمار و مطالب" },
     { id: "new", href: "/dashboard/edit", label: "+ مطلب جدید" },
-    { id: "profile", href: "/dashboard/profile", label: "اطلاعات دانشجو" },
+    { id: "moderation", href: "/dashboard/moderation", label: "مدیریت انتشار" },
   ];
-  // Owner-only tabs: rendered solely for the ADMIN_EMAILS account; every page/action re-checks on the server.
-  if (user.isAdmin) {
-    tabs.push(
-      { id: "moderation", href: "/dashboard/moderation", label: "مدیریت مطالب" },
-      { id: "accounts", href: "/dashboard/accounts", label: "حساب‌ها" },
-    );
-  }
 
   return (
     <div className="relative min-h-screen">
@@ -38,22 +31,14 @@ export function DashboardShell({
             <Link href="/" className="flex items-center gap-3">
               <Seal className="h-9 w-9 text-paper-2/90" />
               <span className="leading-tight">
-                <span className="block text-[16px] font-black">میز کار</span>
+                <span className="block text-[16px] font-black">میز کار مدیر</span>
                 <span className="block text-[11px] text-paper-2/60">بایگانی پژوهش</span>
               </span>
             </Link>
 
             <div className="ms-auto flex flex-wrap items-center gap-2.5">
-              <span className="hidden text-[13px] text-paper-2/85 sm:inline">{user.fullName}</span>
-              {user.isAdmin ? (
-                <span className="border border-paper-2/30 px-2 py-0.5 text-[11px] text-paper-2/85">مدیر سایت</span>
-              ) : null}
-              <Link
-                href={`/students/${user.id}`}
-                className="border border-paper-2/30 px-3.5 py-1.5 text-[12.5px] transition-colors hover:border-paper-2"
-              >
-                صفحهٔ عمومی من
-              </Link>
+              <span className="hidden text-[12px] text-paper-2/85 sm:inline" dir="ltr">{user.email}</span>
+              <span className="border border-paper-2/30 px-2 py-0.5 text-[11px] text-paper-2/85">مدیر یگانهٔ سایت</span>
               <form action={logoutAction}>
                 <button
                   type="submit"

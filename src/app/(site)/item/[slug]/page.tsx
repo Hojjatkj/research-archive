@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BlockList } from "@/lib/render";
 import { readingMinutes, tocOf, type Block } from "@/lib/blocks";
-import { getStudent, getVisibleItem, neighbors, reviewsFor, sectionHref, typeLabel } from "@/lib/data";
+import { getStudent, getVisibleItem, neighbors, sectionHref, typeLabel } from "@/lib/data";
+import { hasSeenItem } from "@/lib/seen";
 import { Jalali } from "@/components/ItemRow";
 import { ReviewPanel } from "@/components/ReviewPanel";
 
@@ -32,9 +33,9 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
   if (!item) notFound();
 
   const toc = tocOf(item.content);
-  const [{ prev, next }, reviews, author] = await Promise.all([
+  const [{ prev, next }, alreadySeen, author] = await Promise.all([
     neighbors(item),
-    reviewsFor(item.id),
+    hasSeenItem(item.id),
     item.userId ? getStudent(item.userId) : Promise.resolve(null),
   ]);
 
@@ -82,7 +83,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
               {author.fullName}
             </Link>
           ) : !item.userId ? (
-            <span className="border border-dashed border-rule px-2 py-0.5">محتوای نمونه</span>
+            <span className="border border-dashed border-rule px-2 py-0.5">محتوای بایگانی</span>
           ) : null}
           {item.course ? <span className="text-ink-2">{item.course}</span> : null}
           {item.publishedAt ? (
@@ -195,15 +196,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
             </div>
           ) : null}
 
-          <ReviewPanel
-            itemId={item.id}
-            reviews={reviews.map((r) => ({
-              id: r.id,
-              reviewerName: r.reviewerName,
-              note: r.note,
-              createdAt: r.createdAt.toISOString(),
-            }))}
-          />
+          <ReviewPanel key={item.id} itemId={item.id} alreadySeen={alreadySeen} />
         </aside>
       </div>
     </article>

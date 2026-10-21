@@ -165,26 +165,6 @@ export async function reviewMap(): Promise<Map<number, number>> {
   return new Map(rows.map((r) => [r.itemId, Number(r.n)]));
 }
 
-export async function reviewsFor(itemId: number) {
-  return db.select().from(reviews).where(eq(reviews.itemId, itemId)).orderBy(desc(reviews.createdAt));
-}
-
-export async function latestStamps(): Promise<
-  Map<number, { reviewerName: string; note: string; createdAt: Date; count: number }>
-> {
-  const rows = await db
-    .select({ itemId: reviews.itemId, reviewerName: reviews.reviewerName, note: reviews.note, createdAt: reviews.createdAt })
-    .from(reviews)
-    .orderBy(desc(reviews.createdAt));
-  const map = new Map<number, { reviewerName: string; note: string; createdAt: Date; count: number }>();
-  for (const row of rows) {
-    const existing = map.get(row.itemId);
-    if (existing) existing.count += 1;
-    else map.set(row.itemId, { reviewerName: row.reviewerName, note: row.note, createdAt: row.createdAt, count: 1 });
-  }
-  return map;
-}
-
 export async function allCourses(): Promise<string[]> {
   const rows = await db
     .select({ course: items.course })
@@ -210,38 +190,27 @@ export async function getStudent(id: number): Promise<PublicUser | null> {
   return rows[0] ?? null;
 }
 
-export async function listStudents(): Promise<Array<PublicUser & { published: number; seen: number }>> {
+export async function listStudents(): Promise<Array<PublicUser & { published: number }>> {
   const rows = await db.select(publicUserColumns).from(users).orderBy(asc(users.fullName));
   if (!rows.length) return [];
 
-  const [published, seen] = await Promise.all([
-    db.select({ userId: items.userId, n: count() }).from(items).where(visibleFilter()).groupBy(items.userId),
-    db
-      .select({ userId: items.userId, n: sql<number>`count(distinct ${items.id})` })
-      .from(reviews)
-      .innerJoin(items, eq(reviews.itemId, items.id))
-      .where(visibleFilter())
-      .groupBy(items.userId),
-  ]);
-  const publishedMap = new Map(published.map((r) => [r.userId, Number(r.n)]));
-  const seenMap = new Map(seen.map((r) => [r.userId, Number(r.n)]));
+  const published = await db
+    .select({ userId: items.userId, n: count() })
+    .from(items)
+    .where(visibleFilter())
+    .groupBy(items.userId);
+  const publishedMap = new Map(published.map((row) => [row.userId, Number(row.n)]));
 
   return rows.map((row) => ({
     ...row,
     published: publishedMap.get(row.id) ?? 0,
-    seen: seenMap.get(row.id) ?? 0,
   }));
 }
 
-export async function siteStats(): Promise<{ students: number; published: number; seen: number }> {
-  const [[s], [p], [r]] = await Promise.all([
+export async function siteStats(): Promise<{ students: number; published: number }> {
+  const [[students], [published]] = await Promise.all([
     db.select({ n: count() }).from(users),
     db.select({ n: count() }).from(items).where(visibleFilter()),
-    db
-      .select({ n: sql<number>`count(distinct ${reviews.itemId})` })
-      .from(reviews)
-      .innerJoin(items, eq(reviews.itemId, items.id))
-      .where(visibleFilter()),
   ]);
-  return { students: Number(s?.n ?? 0), published: Number(p?.n ?? 0), seen: Number(r?.n ?? 0) };
+  return { students: Number(students?.n ?? 0), published: Number(published?.n ?? 0) };
 }

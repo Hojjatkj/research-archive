@@ -17,8 +17,6 @@ export type MyItemDTO = {
   moderationNote: string;
   updatedAt: string;
   reviews: number;
-  lastReviewer: string | null;
-  lastReviewAt: string | null;
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -100,10 +98,9 @@ export function MyItems({ items }: { items: MyItemDTO[] }) {
     return (
       <div className="flex flex-col items-center border border-dashed border-rule bg-paper-2/60 px-6 py-16 text-center">
         <EmptySheet className="h-14 w-14 text-ink/30" />
-        <p className="mt-5 text-[18px] font-black text-ink">هنوز مطلبی ننوشته‌اید</p>
+        <p className="mt-5 text-[18px] font-black text-ink">هنوز مطلبی در آرشیو نیست</p>
         <p className="mt-2 max-w-md text-[13.5px] leading-8 text-ink-soft">
-          اولین تکلیف، گزارش، ارائه یا جزوه را بنویسید. می‌توانید با یک پیش‌نویس شروع کنید و هر وقت
-          آماده بود منتشرش کنید.
+          از این بخش می‌توانید مطلب جدید بنویسید، آن را منتشر کنید و تعداد ثبت‌های «من دیدم» را ببینید.
         </p>
         <Link href="/dashboard/edit" className="mt-6 border border-accent bg-accent px-5 py-2.5 text-[14px] font-bold text-paper-2 hover:bg-accent-2">
           + نوشتن اولین مطلب
@@ -116,7 +113,7 @@ export function MyItems({ items }: { items: MyItemDTO[] }) {
     ["all", "همه"],
     ["published", "منتشرشده"],
     ["draft", "پیش‌نویس"],
-    ["seen", "مشاهده‌شده"],
+    ["seen", "دارای ثبت دید"],
     ["hidden", "خارج‌شده توسط مدیر"],
   ];
 
@@ -140,7 +137,7 @@ export function MyItems({ items }: { items: MyItemDTO[] }) {
               </button>
             ))}
         </div>
-        <label htmlFor="my-items-search" className="sr-only">جست‌وجو در مطالب من</label>
+        <label htmlFor="my-items-search" className="sr-only">جست‌وجو در مطالب آرشیو</label>
         <input
           id="my-items-search"
           value={query}
@@ -179,18 +176,17 @@ export function MyItems({ items }: { items: MyItemDTO[] }) {
                     </h3>
                     <p className="mt-0.5 text-[12px] text-ink-soft">آخرین ویرایش: {formatDate(item.updatedAt)}</p>
 
-                    {item.reviews > 0 && item.lastReviewAt ? (
+                    {item.reviews > 0 ? (
                       <p className="mt-2.5 inline-flex flex-wrap items-center gap-1.5 border border-accent/40 px-2.5 py-1 text-[12px] font-bold text-accent">
-                        ✓ مشاهده شد · {item.lastReviewer} · {formatDate(item.lastReviewAt)}
-                        {item.reviews > 1 ? <span className="font-normal">({item.reviews} بار)</span> : null}
+                        ✓ ثبت «من دیدم»: <span className="num">{item.reviews}</span>
                       </p>
                     ) : item.status === "published" && !item.hiddenByAdmin ? (
-                      <p className="mt-2.5 text-[12px] text-ink-soft">هنوز توسط استاد مشاهده نشده است.</p>
+                      <p className="mt-2.5 text-[12px] text-ink-soft">هنوز ثبت «من دیدم» ندارد.</p>
                     ) : null}
 
                     {item.hiddenByAdmin ? (
                       <p className="mt-3 border-s-4 border-accent bg-accent/10 px-3.5 py-2.5 text-[12.5px] leading-7 text-accent-2">
-                        مدیر سایت این مطلب را از دید عموم خارج کرده است
+                        این مطلب از دید عموم خارج است
                         {item.moderationNote ? ` — «${item.moderationNote}»` : "."} مطلب برای شما محفوظ است و
                         می‌توانید آن را ویرایش کنید.
                       </p>

@@ -1,13 +1,26 @@
 import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { db } from "@/db";
 import { items, reviews } from "@/db/schema";
+import { createReaderToken, hashReaderToken, isReaderToken, READER_COOKIE, READER_COOKIE_MAX_AGE } from "@/lib/seen";
 
 export const dynamic = "force-dynamic";
 
-/** Public endpoint: the professor stamps «مشاهده شد» without an account. */
+/** Public endpoint: records one anonymous «I saw this» stamp per browser/post. */
 export async function POST(request: Request) {
-  let body: { itemId?: unknown; reviewerName?: unknown; note?: unknown };
+  const origin = request.headers.get("origin");
+  if (origin) {
+    try {
+      if (new URL(origin).origin !== new URL(request.url).origin) {
+        return NextResponse.json({ error: "درخواست نامعتبر است." }, { status: 403 });
+      }
+    } catch {
+      return NextResponse.json({ error: "درخواست نامعتبر است." }, { status: 403 });
+    }
+  }
+
+  let body: { itemId?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -15,17 +28,8 @@ export async function POST(request: Request) {
   }
 
   const itemId = Number(body.itemId);
-  const reviewerName = typeof body.reviewerName === "string" ? body.reviewerName.trim() : "";
-  const note = typeof body.note === "string" ? body.note.trim() : "";
-
   if (!Number.isInteger(itemId) || itemId <= 0) {
     return NextResponse.json({ error: "شناسهٔ مطلب نامعتبر است." }, { status: 400 });
-  }
-  if (!reviewerName || reviewerName.length > 80) {
-    return NextResponse.json({ error: "نام بیننده را وارد کنید (حداکثر ۸۰ نویسه)." }, { status: 400 });
-  }
-  if (note.length > 500) {
-    return NextResponse.json({ error: "یادداشت بیش از ۵۰۰ نویسه است." }, { status: 400 });
   }
 
   try {
@@ -38,9 +42,38 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "این مطلب در دسترس نیست." }, { status: 404 });
     }
 
-    const inserted = await db.insert(reviews).values({ itemId, reviewerName, note }).returning();
-    return NextResponse.json({ review: inserted[0] }, { status: 201 });
+    const jar = await cookies();
+    const savedToken = jar.get(READER_COOKIE)?.value;
+    const token = isReaderToken(savedToken) ? savedToken : createReaderToken();
+    const createdCookie = !isReaderToken(savedToken);
+
+    const inserted = await db
+      .insert(reviews)
+      .values({
+        itemId,
+        reviewerName: "بازدیدکننده",
+        note: "",
+        visitorTokenHash: hashReaderToken(token),
+      })
+      .onConflictDoNothing({ target: [reviews.itemId, reviews.visitorTokenHash] })
+      .returning({ id: reviews.id });
+
+    const response = NextResponse.json(
+      { alreadySeen: inserted.length === 0, message: inserted.length ? "ثبت شد." : "این مطلب قبلاً ثبت شده است." },
+      { status: inserted.length ? 201 : 200, headers: { "Cache-Control": "no-store" } },
+    );
+    if (createdCookie) {
+      const secure = Boolean(process.env.VERCEL) || new URL(request.url).protocol === "https:";
+      response.cookies.set(READER_COOKIE, token, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure,
+        path: "/",
+        maxAge: READER_COOKIE_MAX_AGE,
+      });
+    }
+    return response;
   } catch {
-    return NextResponse.json({ error: "ثبت مهر انجام نشد؛ دوباره تلاش کنید." }, { status: 500 });
+    return NextResponse.json({ error: "ثبت انجام نشد؛ دوباره تلاش کنید." }, { status: 500 });
   }
 }

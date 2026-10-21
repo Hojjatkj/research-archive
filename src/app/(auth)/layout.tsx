@@ -26,8 +26,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         <main className="flex-1">{children}</main>
 
         <footer className="border-t border-rule px-5 py-5 text-center text-[12px] leading-7 text-ink-soft">
-          حساب کاربری فقط برای دانشجویان است؛ استاد راهنما برای خواندن مطالب و ثبت «مشاهده شد» به
-          حساب نیاز ندارد.
+          این ورود فقط برای مدیر سایت است؛ بازدیدکنندگان بدون حساب می‌توانند مطالب را بخوانند و «من دیدم» را ثبت کنند.
         </footer>
       </div>
     </div>

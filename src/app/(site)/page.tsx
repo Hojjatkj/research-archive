@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { ItemRow } from "@/components/ItemRow";
 import { SearchForm } from "@/components/Pagination";
-import { SeenStamp } from "@/components/Brand";
 import { getCurrentUser } from "@/lib/auth";
-import { countsByType, listPublished, reviewMap, sectionHref, siteStats, TYPES } from "@/lib/data";
+import { countsByType, listPublished, sectionHref, siteStats, TYPES } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -15,10 +14,9 @@ const BLURBS: Record<string, string> = {
 };
 
 export default async function HomePage() {
-  const [{ rows: latest }, counts, reviews, stats, user] = await Promise.all([
+  const [{ rows: latest }, counts, stats, user] = await Promise.all([
     listPublished({ perPage: 5 }),
     countsByType(),
-    reviewMap(),
     siteStats(),
     getCurrentUser(),
   ]);
@@ -35,44 +33,37 @@ export default async function HomePage() {
             <h1 className="mt-6 text-[clamp(2.2rem,5.4vw,3.9rem)] font-black leading-[1.22] text-ink">
               تکالیف، پژوهش، ارائه و جزوه؛
               <br />
-              <span className="text-accent">منظم و قابل رصد.</span>
+              <span className="text-accent">منظم و قابل خواندن.</span>
             </h1>
             <p className="mt-6 max-w-xl text-[17px] leading-9 text-ink-soft">
-              هر دانشجو حساب خودش را می‌سازد و کارهایش را در بخش‌های جدا منتشر می‌کند. استاد راهنما
-              بدون نیاز به حساب، مطالب را می‌خواند و با مهر «مشاهده شد» تأیید می‌کند — و دانشجو می‌بیند
-              کدام کار دیده شده است.
+              مطالب منتشرشده برای همه قابل خواندن است و ساخت حساب عمومی وجود ندارد. اگر مطلبی را خواندید،
+              دکمهٔ «من این مطلب را دیدم» را بزنید؛ هر مرورگر برای هر مطلب فقط یک‌بار می‌تواند ثبت کند.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              {user ? (
-                <Link href="/dashboard" className="border border-ink bg-ink px-5 py-3 text-[15px] font-bold text-paper-2 hover:bg-ink-2">
-                  رفتن به میز کار
-                </Link>
-              ) : (
-                <>
-                  <Link href="/signup" className="border border-accent bg-accent px-5 py-3 text-[15px] font-bold text-paper-2 hover:bg-accent-2">
-                    ساخت حساب دانشجویی
-                  </Link>
-                  <Link href="/login" className="border border-ink px-5 py-3 text-[15px] font-bold text-ink hover:bg-ink hover:text-paper-2">
-                    ورود
-                  </Link>
-                </>
-              )}
-              <Link href="/students" className="px-2 py-3 text-[14px] font-bold text-ink underline decoration-accent decoration-2 underline-offset-[0.45em]">
-                استاد هستید؟ اطلاعات دانشجو
+              <Link href="/archive" className="border border-accent bg-accent px-5 py-3 text-[15px] font-bold text-paper-2 hover:bg-accent-2">
+                رفتن به آرشیو
               </Link>
+              <Link href="/students" className="border border-ink px-5 py-3 text-[14px] font-bold text-ink hover:bg-ink hover:text-paper-2">
+                اطلاعات دانشجو
+              </Link>
+              {user ? (
+                <Link href="/dashboard" className="px-2 py-3 text-[14px] font-bold text-ink underline decoration-accent decoration-2 underline-offset-[0.45em]">
+                  میز کار مدیر
+                </Link>
+              ) : null}
             </div>
 
             <SearchForm className="mt-9 max-w-lg" />
           </div>
 
           <div className="relative border border-ink/20 bg-paper-2 px-7 py-8 shadow-[0_24px_60px_rgba(22,35,63,0.08)] sm:px-10 sm:py-10">
-            <p className="text-[12px] font-bold text-ink-soft">کارنامهٔ کلاس — هم‌اکنون</p>
+            <p className="text-[12px] font-bold text-ink-soft">نمای کلی بایگانی</p>
             <dl className="mt-6 grid grid-cols-3 gap-px border border-rule bg-rule">
               {[
                 ["دانشجو", stats.students],
                 ["مطلب منتشرشده", stats.published],
-                ["مشاهده‌شده", stats.seen],
+                ["بخش آرشیو", TYPES.length],
               ].map(([label, value]) => (
                 <div key={String(label)} className="bg-paper-2 px-3 py-5 text-center">
                   <dd className="num text-[34px] font-semibold leading-none text-ink">{String(value).padStart(2, "0")}</dd>
@@ -80,11 +71,11 @@ export default async function HomePage() {
                 </div>
               ))}
             </dl>
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-6">
-              <p className="max-w-[15rem] text-[13px] leading-7 text-ink-soft">
-                هر مهر یعنی استاد مطلب را خوانده است؛ دانشجو همان لحظه آن را در میز کار خود می‌بیند.
+            <div className="mt-8 border-s-2 border-accent/50 ps-4">
+              <p className="text-[13px] font-bold text-ink-2">ثبت بازدید بدون حساب</p>
+              <p className="mt-2 text-[13px] leading-8 text-ink-soft">
+                برای حفظ حریم خصوصی، تعداد ثبت‌های هر مطلب فقط در میز کار مدیر نمایش داده می‌شود؛ نام یا ایمیل بازدیدکننده ذخیره نمی‌شود.
               </p>
-              <SeenStamp name="استاد راهنما" date="نمونهٔ مهر" />
             </div>
           </div>
         </div>
@@ -115,7 +106,7 @@ export default async function HomePage() {
         {latest.length === 0 ? (
           <p className="py-16 text-center text-ink-soft">هنوز مطلبی منتشر نشده است.</p>
         ) : (
-          latest.map((item) => <ItemRow key={item.id} item={item} reviewed={reviews.get(item.id) ?? 0} />)
+          latest.map((item) => <ItemRow key={item.id} item={item} />)
         )}
       </section>
 
@@ -124,14 +115,14 @@ export default async function HomePage() {
           <div className="max-w-2xl">
             <p className="text-[13px] font-bold text-paper-2/70">روند کار</p>
             <h2 className="mt-4 text-[clamp(1.9rem,3.4vw,2.6rem)] font-black leading-[1.45]">
-              دانشجو منتشر می‌کند، استاد می‌بیند و مهر می‌زند.
+              مدیر منتشر می‌کند؛ همه می‌خوانند و ثبت می‌کنند.
             </h2>
           </div>
           <ol className="mt-12 grid gap-px bg-paper-2/15 md:grid-cols-3">
             {[
-              ["01", "ثبت‌نام دانشجو", "نام، شماره دانشجویی، دانشگاه، کلاس، استاد و زمان کلاس یک بار ثبت می‌شود و صفحهٔ «اطلاعات دانشجو» ساخته می‌شود."],
-              ["02", "انتشار منظم کارها", "تکالیف، گزارش‌ها، ارائه‌ها و جزوه‌ها با متن، تصویر، جدول، ویدیو، پیوست و منابع در بخش‌های جدا منتشر می‌شوند."],
-              ["03", "«مشاهده شد» توسط استاد", "استاد بدون حساب کاربری مطلب را می‌خواند و مهر می‌زند؛ دانشجو در میز کارش می‌بیند کدام کار دیده شده است."],
+              ["01", "انتشار توسط مدیر", "فقط مدیر سایت وارد میز کار می‌شود و مطالب آرشیو را می‌نویسد، ویرایش می‌کند یا از انتشار خارج می‌کند."],
+              ["02", "خواندن آزاد", "بازدیدکنندگان بدون ساخت حساب، مطالب منتشرشده را می‌خوانند و در میان بخش‌های آرشیو جست‌وجو می‌کنند."],
+              ["03", "یک ثبت برای هر مطلب", "با دکمهٔ «من این مطلب را دیدم»، هر مرورگر برای هر مطلب یک‌بار ثبت می‌کند. شمار ثبت‌ها فقط برای مدیر نمایش داده می‌شود."],
             ].map(([n, title, text]) => (
               <li key={n} className="bg-ink px-7 py-9">
                 <p className="num text-[13px] text-paper-2/55">{n}</p>
