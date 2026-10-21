@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect } from "react";
 import { EmptySheet } from "@/components/Brand";
 
-export default function Error({
+export default function ErrorPage({
   error,
   reset,
 }: {
@@ -11,21 +12,19 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("archive error:", error);
+    console.error("page error:", error);
   }, [error]);
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center px-6 py-16 text-center">
-      <EmptySheet className="h-20 w-20 text-ink/30" />
-      <p className="num mt-8 text-[12px] text-ink-soft">خطا در نمایش این صفحه</p>
-      <h1 className="mt-4 text-[clamp(1.8rem,5vw,2.6rem)] font-black leading-[1.5] text-ink">
-        این صفحه باز نشد
+    <main className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center px-6 py-16 text-center">
+      <EmptySheet className="h-16 w-16 text-ink/30" />
+      <h1 className="mt-6 text-[clamp(1.7rem,4.5vw,2.4rem)] font-black leading-[1.5] text-ink">
+        مشکلی در نمایش این صفحه پیش آمد
       </h1>
-      <p className="mt-5 text-[15px] leading-9 text-ink-soft">
-        مشکلی در ارتباط با پایگاه داده پیش آمد. اگر مطلبی را دوباره ذخیره کرده‌اید، ممکن
-        است نشانی آن تکراری باشد — در این حالت عنوان یا نشانی دیگری امتحان کنید.
+      <p className="mt-4 text-[15px] leading-9 text-ink-soft">
+        یک بار دیگر تلاش کنید. اگر مشکل ادامه داشت، از صفحهٔ خانه دوباره وارد شوید.
       </p>
-
+      {error.digest ? <p className="num mt-3 text-[11px] text-ink-soft">کد پیگیری: {error.digest}</p> : null}
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <button
           type="button"
@@ -34,18 +33,9 @@ export default function Error({
         >
           تلاش دوباره
         </button>
-        <a
-          href="/admin"
-          className="border border-rule px-5 py-2.5 text-[14px] text-ink hover:border-ink"
-        >
-          بازگشت به مدیریت
-        </a>
-        <a
-          href="/"
-          className="border border-rule px-5 py-2.5 text-[14px] text-ink hover:border-ink"
-        >
+        <Link href="/" className="border border-rule px-5 py-2.5 text-[14px] text-ink hover:border-ink">
           بازگشت به خانه
-        </a>
+        </Link>
       </div>
     </main>
   );

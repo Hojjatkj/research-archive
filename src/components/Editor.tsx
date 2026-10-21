@@ -11,7 +11,7 @@ import {
   deleteItemAction,
   saveItemAction,
   type ItemInput,
-} from "@/app/admin/actions";
+} from "@/app/dashboard/actions";
 
 export type ItemDTO = {
   id: number;
@@ -24,6 +24,8 @@ export type ItemDTO = {
   status: "draft" | "published";
   content: Block[];
   coverFileId: number | null;
+  hiddenByAdmin?: boolean;
+  moderationNote?: string;
 };
 
 const TYPE_OPTIONS = [
@@ -219,7 +221,7 @@ export function Editor({ initial, savedFlash }: { initial: ItemDTO | null; saved
     window.setTimeout(() => setFlash(null), 4000);
 
     if (!initial?.id) {
-      router.replace(`/admin/edit/${result.id}?saved=1`);
+      router.replace(`/dashboard/edit/${result.id}?saved=1`);
     } else {
       router.refresh();
     }
@@ -238,7 +240,7 @@ export function Editor({ initial, savedFlash }: { initial: ItemDTO | null; saved
         setError(result.error ?? "حذف انجام نشد.");
         return;
       }
-      router.push("/admin");
+      router.push("/dashboard");
       router.refresh();
     } catch {
       setError("حذف انجام نشد. دوباره تلاش کنید.");
@@ -363,10 +365,10 @@ export function Editor({ initial, savedFlash }: { initial: ItemDTO | null; saved
                 {busy === "save" ? "در حال ذخیره…" : "ذخیره و انتشار"}
               </button>
               <Link
-                href="/admin"
+                href="/dashboard"
                 className="border border-paper-2/20 px-3.5 py-2 text-[12.5px] text-paper-2/75 hover:border-paper-2/50"
               >
-                مدیریت
+                میز کار
               </Link>
             </div>
           </div>
@@ -396,6 +398,17 @@ export function Editor({ initial, savedFlash }: { initial: ItemDTO | null; saved
             </p>
           ) : null}
 
+          {initial?.hiddenByAdmin ? (
+            <p
+              role="note"
+              className="mb-6 border-s-4 border-accent bg-accent/10 px-4 py-3 text-[13px] leading-7 text-accent-2"
+            >
+              مدیر کلاس این مطلب را از دید عموم خارج کرده است
+              {initial.moderationNote ? ` — «${initial.moderationNote}»` : "."} مطلب برای شما محفوظ است؛
+              ویرایش‌ها ذخیره می‌شوند و پس از بازگرداندن توسط مدیر دوباره نمایش داده می‌شود.
+            </p>
+          ) : null}
+
           {preview ? (
             <div className="border border-rule bg-paper-2 px-7 py-10">
               <p className="mb-8 border-b border-rule pb-4 text-[12px] text-ink-soft">
@@ -410,7 +423,7 @@ export function Editor({ initial, savedFlash }: { initial: ItemDTO | null; saved
                 </p>
               ) : null}
               <div className="mt-10">
-                <BlockList blocks={blocks} />
+                <BlockList blocks={blocks} preview />
               </div>
             </div>
           ) : (

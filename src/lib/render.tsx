@@ -83,7 +83,15 @@ function embedSrc(url: string): string | null {
 
 /* ── one content block ───────────────────────────────────── */
 
-export function BlockView({ block, index }: { block: Block; index: number }) {
+export function BlockView({
+  block,
+  index,
+  preview = false,
+}: {
+  block: Block;
+  index: number;
+  preview?: boolean;
+}) {
   const id = `b-${index}`;
 
   switch (block.type) {
@@ -136,6 +144,8 @@ export function BlockView({ block, index }: { block: Block; index: number }) {
       );
 
     case "image":
+      // Public pages never show an empty placeholder — only the editor preview does.
+      if (!block.fileId && !preview) return null;
       return (
         <figure id={id} className="not-prose">
           {block.fileId ? (
@@ -155,6 +165,13 @@ export function BlockView({ block, index }: { block: Block; index: number }) {
       );
 
     case "file":
+      if (!block.fileId) {
+        return preview ? (
+          <p id={id} className="not-prose text-[13px] text-ink-soft">
+            پیوستی بارگذاری نشده است.
+          </p>
+        ) : null;
+      }
       return (
         <p id={id} className="not-prose">
           <a
@@ -252,11 +269,11 @@ export function BlockView({ block, index }: { block: Block; index: number }) {
   }
 }
 
-export function BlockList({ blocks }: { blocks: Block[] }) {
+export function BlockList({ blocks, preview = false }: { blocks: Block[]; preview?: boolean }) {
   return (
     <div className="prose-fa">
       {blocks.map((block, index) => (
-        <BlockView key={index} block={block} index={index} />
+        <BlockView key={index} block={block} index={index} preview={preview} />
       ))}
     </div>
   );

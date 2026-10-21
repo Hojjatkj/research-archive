@@ -1,0 +1,25 @@
+# dependencies
+/node_modules
+
+# next.js build output
+/.next/
+/out/
+
+# env files — real values live in the Vercel dashboard, never in git
+.env
+.env*.local
+.env.development
+.env.production
+
+# typescript / tooling
+*.tsbuildinfo
+next-env.d.ts
+
+# vercel
+.vercel
+
+# misc
+.DS_Store
+npm-debug.log*
+*.pem
+cookie.txt

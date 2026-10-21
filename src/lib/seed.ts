@@ -261,10 +261,14 @@ async function runSeed(): Promise<void> {
     imageId = 0;
   }
 
-  const articleContent = SAMPLE_ARTICLE.map((block) =>
+  // If the sample image can't be read (e.g. serverless bundles without /public),
+  // drop the image/attachment blocks instead of shipping empty placeholders.
+  const articleContent = SAMPLE_ARTICLE.flatMap<Block>((block) =>
     block.type === "image" || block.type === "file"
-      ? { ...block, fileId: imageId }
-      : block,
+      ? imageId
+        ? [{ ...block, fileId: imageId }]
+        : []
+      : [block],
   );
 
   const now = new Date();

@@ -1,78 +1,79 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import Link from "next/link";
+import { useActionState } from "react";
+import { saveProfileAction } from "@/app/dashboard/actions";
+import { type FormState, hasErrors, readProfile, validateProfile } from "@/lib/validation";
+import { Field, FormAlert } from "./auth/Field";
+import { SubmitButton } from "./auth/SubmitButton";
+import { focusField, useFieldErrors } from "./auth/useFieldErrors";
 
-export type ProfileDTO = {
-  id?: number;
-  name: string;
-  university: string;
-  course: string;
+export function ProfileForm({
+  initial,
+  email,
+  userId,
+}: {
+  initial: Record<string, string>;
   email: string;
-  bio: string;
-};
-
-export function ProfileForm({ initial }: { initial?: ProfileDTO }) {
-  const router = useRouter();
-  const [name, setName] = useState(initial?.name ?? "");
-  const [university, setUniversity] = useState(initial?.university ?? "");
-  const [course, setCourse] = useState(initial?.course ?? "");
-  const [email, setEmail] = useState(initial?.email ?? "");
-  const [bio, setBio] = useState(initial?.bio ?? "");
-  const [busy, setBusy] = useState(false);
-  const [flash, setFlash] = useState<string | null>(null);
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    try {
-      const res = await fetch("/api/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), university: university.trim(), course: course.trim(), email: email.trim(), bio: bio.trim() }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error ?? "خطا");
-      setFlash("ذخیره شد.");
-      window.setTimeout(() => setFlash(null), 3000);
-      router.refresh();
-    } catch {
-      setFlash("ذخیره ناموفق بود.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  const inputClass = "w-full border border-rule bg-white px-4 py-3 text-[15px] text-ink placeholder:text-ink-soft/60 focus:border-ink focus:outline-none";
+  userId: number;
+}) {
+  const initialState: FormState = { errors: {}, values: initial };
+  const [state, formAction, pending] = useActionState(saveProfileAction, initialState);
+  const { formRef, errors, clear, setClientErrors } = useFieldErrors(state);
+  const v = state.values;
 
   return (
-    <div className="mx-auto max-w-[640px] px-5 py-10 lg:px-8">
-      <h1 className="text-[20px] font-black text-ink">ویرایش اطلاعات «دربارهٔ من»</h1>
-      <form onSubmit={submit} className="mt-6 space-y-5 border border-rule bg-paper-2 px-6 py-8 shadow-[0_18px_50px_rgba(22,35,63,0.10)]">
-        <p className="text-[12px] text-ink-soft">چند فیلد ضروری برای نمایش در صفحهٔ دربارهٔ من.</p>
-        <div>
-          <label htmlFor="p-name" className="mb-1.5 block text-[13px] font-bold text-ink-2">نام *</label>
-          <input id="p-name" value={name} onChange={(e) => setName(e.target.value)} required className={inputClass} />
+    <form
+      ref={formRef}
+      action={formAction}
+      noValidate
+      onSubmit={(event) => {
+        const found = validateProfile(readProfile(new FormData(event.currentTarget)));
+        if (hasErrors(found)) {
+          event.preventDefault();
+          setClientErrors(found);
+          focusField(event.currentTarget, Object.keys(found)[0]);
+          return;
+        }
+        setClientErrors({});
+      }}
+      className="border border-ink/15 bg-paper-2 shadow-[0_18px_50px_rgba(22,35,63,0.08)]"
+    >
+      <div className="space-y-5 px-5 py-6 sm:px-8 sm:py-8">
+        {state.ok && state.message ? (
+          <FormAlert tone="success">
+            {state.message}{" "}
+            <Link href={`/students/${userId}`} className="font-bold underline underline-offset-4">
+              مشاهدهٔ صفحهٔ عمومی
+            </Link>
+          </FormAlert>
+        ) : null}
+        {state.formError ? <FormAlert>{state.formError}</FormAlert> : null}
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <Field id="pf-name" name="fullName" label="نام و نام خانوادگی" required autoComplete="name" defaultValue={v.fullName} error={errors.fullName} onChange={() => clear("fullName")} maxLength={80} />
+          </div>
+          <Field id="pf-number" name="studentNumber" label="شماره دانشجویی" required dir="ltr" inputMode="numeric" defaultValue={v.studentNumber} error={errors.studentNumber} onChange={() => clear("studentNumber")} maxLength={20} />
+          <Field id="pf-university" name="university" label="نام دانشگاه" required defaultValue={v.university} error={errors.university} onChange={() => clear("university")} maxLength={100} />
+          <Field id="pf-class" name="className" label="کلاس / درس" required defaultValue={v.className} error={errors.className} onChange={() => clear("className")} maxLength={100} />
+          <Field id="pf-professor" name="professorName" label="نام استاد" required defaultValue={v.professorName} error={errors.professorName} onChange={() => clear("professorName")} maxLength={80} />
+          <Field id="pf-time" name="classTime" label="زمان کلاس" optional placeholder="مثلاً: شنبه‌ها ۱۰ تا ۱۲" defaultValue={v.classTime} error={errors.classTime} onChange={() => clear("classTime")} maxLength={60} />
+          <Field id="pf-email" name="accountEmail" label="ایمیل ورود" dir="ltr" defaultValue={email} readOnly hint="ایمیل خصوصی است و نمایش داده نمی‌شود." />
+          <div className="sm:col-span-2">
+            <Field id="pf-bio" name="bio" label="معرفی کوتاه" optional multiline rows={4} defaultValue={v.bio} error={errors.bio} onChange={() => clear("bio")} maxLength={400} hint="یک یا دو جمله دربارهٔ زمینهٔ پژوهشی یا هدف این بایگانی." />
+          </div>
         </div>
-        <div>
-          <label htmlFor="p-university" className="mb-1.5 block text-[13px] font-bold text-ink-2">دانشگاه</label>
-          <input id="p-university" value={university} onChange={(e) => setUniversity(e.target.value)} className={inputClass} />
+      </div>
+
+      <div className="flex flex-col gap-3 border-t border-rule bg-paper px-5 py-5 sm:flex-row sm:items-center sm:px-8">
+        <div className="sm:w-60">
+          <SubmitButton pending={pending} pendingLabel="در حال ذخیره…">
+            ذخیرهٔ اطلاعات
+          </SubmitButton>
         </div>
-        <div>
-          <label htmlFor="p-course" className="mb-1.5 block text-[13px] font-bold text-ink-2">درس / مقطع</label>
-          <input id="p-course" value={course} onChange={(e) => setCourse(e.target.value)} className={inputClass} />
-        </div>
-        <div>
-          <label htmlFor="p-email" className="mb-1.5 block text-[13px] font-bold text-ink-2">ایمیل</label>
-          <input id="p-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
-        </div>
-        <div>
-          <label htmlFor="p-bio" className="mb-1.5 block text-[13px] font-bold text-ink-2">بیوگرافی کوتاه</label>
-          <textarea id="p-bio" rows={4} value={bio} onChange={(e) => setBio(e.target.value)} className={`${inputClass} resize-y`} />
-        </div>
-        {flash ? <p className="border-e-4 border-moss bg-moss/10 px-3.5 py-2.5 text-[13px] text-moss">{flash}</p> : null}
-        <button type="submit" disabled={busy} className="w-full border border-ink bg-ink px-4 py-3 text-[15px] font-bold text-paper-2 hover:bg-ink-2 disabled:opacity-60">{busy ? "در حال ذخیره…" : "ذخیره"}</button>
-      </form>
-    </div>
+        <p className="text-[12.5px] text-ink-soft">تغییرات بلافاصله روی صفحهٔ عمومی شما اعمال می‌شود.</p>
+      </div>
+    </form>
   );
 }

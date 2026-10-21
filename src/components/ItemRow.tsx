@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Item } from "@/db/schema";
-import { typeShort, typeLabel } from "@/lib/data";
+import { typeLabel, typeShort } from "@/lib/data";
 import { readingMinutes } from "@/lib/blocks";
 
 export function Jalali({ date }: { date: Date | null }) {
@@ -16,31 +16,29 @@ export function Jalali({ date }: { date: Date | null }) {
 export function ItemRow({
   item,
   reviewed = 0,
+  showAuthor = true,
 }: {
-  item: Item;
+  item: Item & { authorName?: string | null };
   reviewed?: number;
+  showAuthor?: boolean;
 }) {
   return (
     <article className="group border-b border-rule py-8">
       <div className="flex flex-wrap items-start gap-x-8 gap-y-4">
-        <div className="w-full max-w-[8.5rem] shrink-0 sm:w-auto">
+        <div className="w-full shrink-0 sm:w-[8.5rem]">
           <p className="text-[12px] font-bold text-accent">{typeShort(item.type)}</p>
-          <p className="num mt-1 text-[11px] text-ink-soft">
-            {item.publishedAt ? (
-              <Jalali date={item.publishedAt} />
-            ) : (
-              "منتشر نشده"
-            )}
+          <p className="mt-1 text-[11.5px] text-ink-soft">
+            {item.publishedAt ? <Jalali date={item.publishedAt} /> : "منتشر نشده"}
           </p>
           {reviewed > 0 ? (
-            <p className="mt-2 inline-block border border-accent/40 px-2 py-0.5 text-[11px] text-accent">
+            <p className="mt-2 inline-block border border-accent/40 px-2 py-0.5 text-[11px] font-bold text-accent">
               ✓ مشاهده شد
             </p>
           ) : null}
         </div>
 
         <div className="min-w-0 flex-1">
-          <h3 className="text-[22px] font-black leading-[1.65] text-ink">
+          <h3 className="text-[21px] font-black leading-[1.65] text-ink">
             <Link
               href={`/item/${item.slug}`}
               className="decoration-accent decoration-1 underline-offset-[0.35em] hover:underline"
@@ -48,12 +46,21 @@ export function ItemRow({
               {item.title}
             </Link>
           </h3>
-          <p className="mt-2.5 line-clamp-3 text-[15px] leading-9 text-ink-soft">
-            {item.summary}
-          </p>
+          {item.summary ? (
+            <p className="mt-2.5 line-clamp-3 text-[15px] leading-9 text-ink-soft">{item.summary}</p>
+          ) : null}
           <div className="mt-3.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px] text-ink-soft">
+            {showAuthor ? (
+              item.userId && item.authorName ? (
+                <Link href={`/students/${item.userId}`} className="font-bold text-ink-2 hover:text-accent">
+                  {item.authorName}
+                </Link>
+              ) : !item.userId ? (
+                <span className="border border-dashed border-rule px-2 py-0.5 text-[11px]">محتوای نمونه</span>
+              ) : null
+            ) : null}
             {item.course ? <span className="text-ink-2">{item.course}</span> : null}
-            <span className="num">{readingMinutes(item.content)} دقیقه مطالعه</span>
+            <span>{readingMinutes(item.content)} دقیقه مطالعه</span>
             {item.tags.slice(0, 3).map((tag) => (
               <Link
                 key={tag}
