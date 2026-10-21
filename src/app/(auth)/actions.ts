@@ -1,12 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { and, count, eq, isNull, notInArray } from "drizzle-orm";
+import { and, eq, isNull, notInArray } from "drizzle-orm";
 import { db } from "@/db";
 import { items, users } from "@/db/schema";
 import { SAMPLE_SLUGS } from "@/lib/seed";
 import {
-  adminEmails,
   createSession,
   destroySession,
   hashPassword,
@@ -80,6 +79,8 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
     }
 
     await createSession(user.id);
+    // An owner whose account predates ADMIN_EMAILS still takes over the old posts.
+    if (isAdminEmail(email)) await claimLegacyItems(user.id);
     signedIn = true;
   } catch {
     return { errors: {}, values, formError: DB_DOWN };
@@ -110,9 +111,8 @@ export async function signupAction(_prev: FormState, formData: FormData): Promis
       .limit(1);
     if (existing.length) return { errors: { email: EMAIL_TAKEN }, values };
 
-    const [{ n }] = await db.select({ n: count() }).from(users);
-    const role =
-      isAdminEmail(email) || (adminEmails().length === 0 && Number(n) === 0) ? "admin" : "student";
+    // Only the owner's email (ADMIN_EMAILS) is ever an admin — no first-account fallback.
+    const role = isAdminEmail(email) ? "admin" : "student";
 
     const inserted = await db
       .insert(users)

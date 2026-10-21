@@ -3,7 +3,7 @@ import Link from "next/link";
 import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { items, reviews } from "@/db/schema";
-import { requireUser } from "@/lib/auth";
+import { adminEmails, requireUser } from "@/lib/auth";
 import { DashboardShell } from "@/components/DashboardShell";
 import { CopyLink } from "@/components/CopyLink";
 import { MyItems, type MyItemDTO } from "@/components/MyItems";
@@ -99,11 +99,19 @@ export default async function DashboardPage({
           </ol>
           {user.isAdmin ? (
             <p className="mt-5 border-t border-moss/30 pt-4 text-[13px] leading-7 text-ink-2">
-              شما <strong>مدیر کلاس</strong> هستید؛ از تب «مدیریت کلاس» می‌توانید مطالب را از دید عموم خارج
-              یا دوباره منتشر کنید — بدون اینکه چیزی حذف شود.
+              شما <strong>مدیر سایت</strong> هستید؛ در تب «مدیریت مطالب» می‌توانید مطلبی را از دید عموم
+              خارج یا دوباره منتشر کنید (بدون حذف) و در تب «حساب‌ها» حساب‌های دیگر را مدیریت کنید.
             </p>
           ) : null}
         </section>
+      ) : null}
+
+      {adminEmails().length === 0 ? (
+        <p className="mb-8 border-s-4 border-ink/40 bg-paper-2 px-4 py-3 text-[13px] leading-7 text-ink-2">
+          <strong>مدیر سایت هنوز تعیین نشده است.</strong> اگر صاحب این سایت هستید، در Vercel متغیر{" "}
+          <code className="inline-code">ADMIN_EMAILS</code> را برابر ایمیل خود قرار دهید و Redeploy کنید؛
+          بخش «مدیریت» فقط برای همان ایمیل فعال می‌شود.
+        </p>
       ) : null}
 
       <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_23rem]">

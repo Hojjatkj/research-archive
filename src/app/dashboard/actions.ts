@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, eq, ne, or, sql } from "drizzle-orm";
+import { redirect } from "next/navigation";
+import { and, eq, inArray, ne, or, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { items, users, type NewItem } from "@/db/schema";
+import { files, items, reviews, sessions, users, type NewItem } from "@/db/schema";
 import { readSessionUser } from "@/lib/auth";
 import { blocksToPlain, type Block } from "@/lib/blocks";
 import { type FormState, hasErrors, readProfile, validateProfile } from "@/lib/validation";
@@ -204,7 +205,7 @@ export async function deleteItemAction(id: number): Promise<ActionResult> {
     if (!isAuthor && !isSampleCleanup) {
       return {
         ok: false,
-        error: "مدیر کلاس نمی‌تواند مطلب دانشجو را حذف کند؛ فقط می‌تواند آن را از انتشار خارج کند.",
+        error: "مدیر سایت نمی‌تواند مطلب دانشجو را حذف کند؛ فقط می‌تواند آن را از انتشار خارج کند.",
       };
     }
 
@@ -221,7 +222,7 @@ export async function deleteItemAction(id: number): Promise<ActionResult> {
 export async function moderateItemAction(id: number, hide: boolean, note: string): Promise<ActionResult> {
   const user = await readSessionUser();
   if (!user) return { ok: false, error: SESSION_EXPIRED };
-  if (!user.isAdmin) return { ok: false, error: "این کار فقط برای مدیر کلاس مجاز است." };
+  if (!user.isAdmin) return { ok: false, error: "این کار فقط برای مدیر سایت مجاز است." };
 
   try {
     const updated = await db
@@ -258,4 +259,94 @@ export async function saveProfileAction(_prev: FormState, formData: FormData): P
   } catch {
     return { errors: {}, values, formError: "ذخیره انجام نشد؛ ارتباط با پایگاه داده برقرار نشد." };
   }
+}
+
+/* ── owner: accounts ───────────────────────────────────────────
+ * Deleting an account removes everything it owns (posts, their «مشاهده شد»
+ * stamps, uploaded files and sessions) in one transaction. Leaving the posts
+ * behind would orphan them — they would show up as sample content or be
+ * attributed to someone else — so the confirmation UI states this explicitly.
+ */
+
+export type AccountFormState = { error?: string };
+
+const OWNER_ONLY = "این کار فقط برای مدیر سایت مجاز است.";
+
+async function purgeAccounts(ids: number[]): Promise<{ users: number; items: number }> {
+  if (!ids.length) return { users: 0, items: 0 };
+  return db.transaction(async (tx) => {
+    const owned = tx.select({ id: items.id }).from(items).where(inArray(items.userId, ids));
+    await tx.delete(reviews).where(inArray(reviews.itemId, owned));
+    const removedItems = await tx
+      .delete(items)
+      .where(inArray(items.userId, ids))
+      .returning({ id: items.id });
+    await tx
+      .delete(files)
+      .where(
+        and(
+          inArray(files.userId, ids),
+          sql`NOT EXISTS (SELECT 1 FROM ${items} WHERE ${items.coverFileId} = ${files.id})`,
+        ),
+      );
+    await tx.delete(sessions).where(inArray(sessions.userId, ids));
+    const removedUsers = await tx
+      .delete(users)
+      .where(inArray(users.id, ids))
+      .returning({ id: users.id });
+    return { users: removedUsers.length, items: removedItems.length };
+  });
+}
+
+export async function deleteAccountAction(
+  _prev: AccountFormState,
+  formData: FormData,
+): Promise<AccountFormState> {
+  const admin = await readSessionUser();
+  if (!admin) return { error: SESSION_EXPIRED };
+  if (!admin.isAdmin) return { error: OWNER_ONLY };
+
+  const id = Number(formData.get("userId"));
+  if (!Number.isInteger(id) || id <= 0) return { error: "حساب انتخاب‌شده نامعتبر است." };
+  if (id === admin.id) return { error: "حساب خودتان را نمی‌توانید حذف کنید." };
+
+  let removed = { users: 0, items: 0 };
+  try {
+    const [target] = await db.select({ id: users.id }).from(users).where(eq(users.id, id)).limit(1);
+    if (!target) return { error: "این حساب پیدا نشد؛ ممکن است قبلاً حذف شده باشد." };
+    removed = await purgeAccounts([id]);
+  } catch {
+    return { error: "حذف حساب انجام نشد؛ دوباره تلاش کنید." };
+  }
+
+  revalidatePath("/", "layout");
+  redirect(`/dashboard/accounts?removed=${removed.users}&items=${removed.items}`);
+}
+
+export async function deleteOtherAccountsAction(
+  _prev: AccountFormState,
+  formData: FormData,
+): Promise<AccountFormState> {
+  const admin = await readSessionUser();
+  if (!admin) return { error: SESSION_EXPIRED };
+  if (!admin.isAdmin) return { error: OWNER_ONLY };
+
+  const typed = String(formData.get("confirm") ?? "")
+    .normalize("NFKC")
+    .replace(/[\s\u200c\u200f\u200e]+/g, "");
+  if (typed !== "حذف") {
+    return { error: "برای تأیید، کلمهٔ «حذف» را دقیقاً در کادر بنویسید." };
+  }
+
+  let removed = { users: 0, items: 0 };
+  try {
+    const others = await db.select({ id: users.id }).from(users).where(ne(users.id, admin.id));
+    if (!others.length) return { error: "حساب دیگری برای حذف وجود ندارد." };
+    removed = await purgeAccounts(others.map((row) => row.id));
+  } catch {
+    return { error: "حذف حساب‌ها انجام نشد؛ دوباره تلاش کنید." };
+  }
+
+  revalidatePath("/", "layout");
+  redirect(`/dashboard/accounts?removed=${removed.users}&items=${removed.items}`);
 }

@@ -10,7 +10,7 @@ import { DashboardShell } from "@/components/DashboardShell";
 import { ModerationList, type ModItemDTO } from "@/components/ModerationList";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "مدیریت کلاس | میز کار" };
+export const metadata: Metadata = { title: "مدیریت مطالب | میز کار" };
 
 export default async function ModerationPage() {
   const user = await requireUser("/dashboard/moderation");
@@ -52,7 +52,7 @@ export default async function ModerationPage() {
 
   return (
     <DashboardShell user={user} active="moderation">
-      <h1 className="text-[clamp(1.6rem,3.4vw,2.1rem)] font-black text-ink">مدیریت کلاس</h1>
+      <h1 className="text-[clamp(1.6rem,3.4vw,2.1rem)] font-black text-ink">مدیریت مطالب</h1>
       <p className="mt-2 max-w-3xl text-[14px] leading-8 text-ink-soft">
         همهٔ مطالب منتشرشدهٔ کلاس این‌جاست. اگر مطلبی نباید در دید عموم باشد، آن را «از انتشار خارج»
         کنید.

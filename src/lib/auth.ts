@@ -26,14 +26,21 @@ export type SessionUser = {
 };
 
 /**
- * Optional allow-list of admin emails (comma separated). When it is empty, the
- * first account created on a fresh database becomes the class admin.
+ * Owner-only admin. ONLY the emails in `ADMIN_EMAILS` (or `ADMIN_EMAIL`) get the
+ * admin area. There is deliberately no "first account becomes admin" fallback,
+ * so nobody can obtain admin rights by signing up early — and changing the env
+ * var takes effect on the next request, because rights are never cached in the DB.
  */
 export function adminEmails(): string[] {
-  return (process.env.ADMIN_EMAILS ?? "")
-    .split(/[,;\s]+/)
-    .map((email) => normalizeEmail(email))
-    .filter(Boolean);
+  const raw = [process.env.ADMIN_EMAILS, process.env.ADMIN_EMAIL].filter(Boolean).join(",");
+  return Array.from(
+    new Set(
+      raw
+        .split(/[,;\s]+/)
+        .map((email) => normalizeEmail(email))
+        .filter(Boolean),
+    ),
+  );
 }
 
 export function isAdminEmail(email: string): boolean {
@@ -118,7 +125,8 @@ export async function readSessionUser(): Promise<SessionUser | null> {
       .limit(1);
     const row = rows[0];
     if (!row) return null;
-    return { ...row, isAdmin: row.role === "admin" || isAdminEmail(row.email) };
+    // The `role` column is informational only; admin rights come from the env allow-list.
+    return { ...row, isAdmin: isAdminEmail(row.email) };
   } catch {
     return null;
   }
@@ -130,6 +138,13 @@ export const getCurrentUser = cache(readSessionUser);
 export async function requireUser(next = "/dashboard"): Promise<SessionUser> {
   const user = await getCurrentUser();
   if (!user) redirect(`/login?next=${encodeURIComponent(next)}`);
+  return user;
+}
+
+/** Owner-only pages: signed-in users who are not on the allow-list go back to their dashboard. */
+export async function requireAdmin(next: string): Promise<SessionUser> {
+  const user = await requireUser(next);
+  if (!user.isAdmin) redirect("/dashboard");
   return user;
 }
 

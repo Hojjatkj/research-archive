@@ -190,7 +190,7 @@ export function MyItems({ items }: { items: MyItemDTO[] }) {
 
                     {item.hiddenByAdmin ? (
                       <p className="mt-3 border-s-4 border-accent bg-accent/10 px-3.5 py-2.5 text-[12.5px] leading-7 text-accent-2">
-                        مدیر کلاس این مطلب را از دید عموم خارج کرده است
+                        مدیر سایت این مطلب را از دید عموم خارج کرده است
                         {item.moderationNote ? ` — «${item.moderationNote}»` : "."} مطلب برای شما محفوظ است و
                         می‌توانید آن را ویرایش کنید.
                       </p>

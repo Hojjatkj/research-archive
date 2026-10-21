@@ -403,7 +403,7 @@ export function Editor({ initial, savedFlash }: { initial: ItemDTO | null; saved
               role="note"
               className="mb-6 border-s-4 border-accent bg-accent/10 px-4 py-3 text-[13px] leading-7 text-accent-2"
             >
-              مدیر کلاس این مطلب را از دید عموم خارج کرده است
+              مدیر سایت این مطلب را از دید عموم خارج کرده است
               {initial.moderationNote ? ` — «${initial.moderationNote}»` : "."} مطلب برای شما محفوظ است؛
               ویرایش‌ها ذخیره می‌شوند و پس از بازگرداندن توسط مدیر دوباره نمایش داده می‌شود.
             </p>

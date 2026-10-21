@@ -5,7 +5,7 @@ import { logoutAction } from "@/app/(auth)/actions";
 import { Seal } from "./Brand";
 import { Grain } from "./Grain";
 
-type Tab = "items" | "profile" | "moderation";
+type Tab = "items" | "profile" | "moderation" | "accounts";
 
 export function DashboardShell({
   user,
@@ -21,7 +21,13 @@ export function DashboardShell({
     { id: "new", href: "/dashboard/edit", label: "+ مطلب جدید" },
     { id: "profile", href: "/dashboard/profile", label: "اطلاعات دانشجو" },
   ];
-  if (user.isAdmin) tabs.push({ id: "moderation", href: "/dashboard/moderation", label: "مدیریت کلاس" });
+  // Owner-only tabs: rendered solely for the ADMIN_EMAILS account; every page/action re-checks on the server.
+  if (user.isAdmin) {
+    tabs.push(
+      { id: "moderation", href: "/dashboard/moderation", label: "مدیریت مطالب" },
+      { id: "accounts", href: "/dashboard/accounts", label: "حساب‌ها" },
+    );
+  }
 
   return (
     <div className="relative min-h-screen">
@@ -40,7 +46,7 @@ export function DashboardShell({
             <div className="ms-auto flex flex-wrap items-center gap-2.5">
               <span className="hidden text-[13px] text-paper-2/85 sm:inline">{user.fullName}</span>
               {user.isAdmin ? (
-                <span className="border border-paper-2/30 px-2 py-0.5 text-[11px] text-paper-2/85">مدیر کلاس</span>
+                <span className="border border-paper-2/30 px-2 py-0.5 text-[11px] text-paper-2/85">مدیر سایت</span>
               ) : null}
               <Link
                 href={`/students/${user.id}`}
